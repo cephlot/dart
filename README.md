@@ -1,1 +1,2 @@
-# dart
+# DART
+Dart Aim Rating Technology
