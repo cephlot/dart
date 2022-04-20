@@ -2,13 +2,14 @@ import cv2
 import numpy as np
 from sys import platform
 
-
-if platform == "darwin":
+from sys import platform
+if platform == "linux" or platform == "linux2":
     cap = cv2.VideoCapture(1)
-    # OS X
+elif platform == "darwin":
+    cap = cv2.VideoCapture(1)
 elif platform == "win32":
     cap = cv2.VideoCapture(0)
-    # Windows...
+
 
 ##cap = cv2.VideoCapture(0)
 
