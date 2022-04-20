@@ -1,7 +1,18 @@
 digraph {
-  START -> initialization
-  initialization -> "listen for data"
-  "listen for data" -> calculate [label="data received"]
-  calculate -> "send back and to scoreboard"
-  "send back and to scoreboard" -> "listen for data"
+  rankdir="TB"
+  nodesep=2;
+
+  a [label="START"]
+  b [label="initialization"]
+  c [label="listen for data"]
+  d [label="calculate"]
+  e [label="send response"]
+  f [label="update scoreboard"]
+
+  a -> b
+  b -> c
+  c -> d [xlabel="data received"]
+  d -> e
+  e -> f
+  f -> c
 }
