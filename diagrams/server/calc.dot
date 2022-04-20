@@ -1,0 +1,18 @@
+digraph {
+  rankdir="TB"
+  nodesep=2;
+
+  a [label="START"]
+  b [label="initialization"]
+  c [label="listen for data"]
+  d [label="calculate"]
+  e [label="send response"]
+  f [label="update scoreboard"]
+
+  a -> b
+  b -> c
+  c -> d [xlabel="data received"]
+  d -> e
+  e -> f
+  f -> c
+}
