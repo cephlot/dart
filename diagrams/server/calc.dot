@@ -1,0 +1,5 @@
+digraph {
+  listen -> calculate [label="data received"]
+  calculate -> send
+  send -> listen
+}
