@@ -4,7 +4,7 @@ from sys import platform
 
 from sys import platform
 if platform == "linux" or platform == "linux2":
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 elif platform == "darwin":
     cap = cv2.VideoCapture(1)
 elif platform == "win32":
@@ -30,15 +30,19 @@ while True:
 
     diff_frame = cv2.absdiff(src1=previous_frame, src2=frame_gauss)
     previous_frame = frame_gauss
-    thresh_frame = cv2.threshold(src=diff_frame, thresh=40, maxval=255, type=cv2.THRESH_BINARY)[1]
+    thresh_frame = cv2.threshold(src=diff_frame, thresh=50, maxval=255, type=cv2.THRESH_BINARY)[1]
     contours, _ = cv2.findContours(image=thresh_frame, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:  
         if cv2.contourArea(contour) < 50:
             # too small: skip!
             continue
         (x, y, w, h) = cv2.boundingRect(contour)
-        present_frame = cv2.rectangle(img=frame, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2)
-    cv2.imshow('Input', present_frame)
+        cv2.rectangle(img=frame, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2)
+    cv2.imshow('Input', frame)
+
+    
+    if thresh_frame.any():
+        print("motion detected!")
 
     c = cv2.waitKey(1)
     if c == 27:
