@@ -1,5 +1,7 @@
 digraph {
-  listen -> calculate [label="data received"]
-  calculate -> send
-  send -> listen
+  START -> initialization
+  initialization -> "listen for data"
+  "listen for data" -> calculate [label="data received"]
+  calculate -> "send back and to scoreboard"
+  "send back and to scoreboard" -> "listen for data"
 }
