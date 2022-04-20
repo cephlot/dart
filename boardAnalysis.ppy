@@ -1,0 +1,16 @@
+class boardAnalyser:
+    def __init__(self, image):
+        self.image = image
+
+    def analyze(self):   
+        raise NotImplementedError
+    def crop_board(self):
+        raise NotImplementedError
+    def multiplier_mask(self):
+        raise NotImplementedError
+    def divide_multiplier_mask(self):
+        raise NotImplementedError
+    def create_singular_multiplier_mask(self):
+        raise NotImplementedError
+    def create_point_mask(self):
+        raise NotImplementedError
