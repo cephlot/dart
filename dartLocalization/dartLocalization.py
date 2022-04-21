@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-class dartLocalization:
+class DartLocalization:
     def find_dart_point(image_without_dart, image_with_dart):
         image_without_dart = cv2.cvtColor(image_without_dart, cv2.COLOR_BGR2GRAY)
         image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
