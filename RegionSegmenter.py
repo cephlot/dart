@@ -1,3 +1,6 @@
+from Helpers.PointMaskHelper import generate_mask
+
+
 class RegionSegmenter:
     '''
     Class that segments an image of the dart board (no dart!)
@@ -38,4 +41,4 @@ class RegionSegmenter:
     def create_singular_multiplier_mask(self):
         raise NotImplementedError
     def create_point_mask(self):
-        raise NotImplementedError
+        self.mask_points = generate_mask(self.image)
