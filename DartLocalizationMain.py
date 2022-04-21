@@ -1,0 +1,21 @@
+import cv2
+from DartLocalization import DartLocalization
+
+scale = 0.6
+
+image_without_dart = cv2.imread("images/board_empty.png")
+image_without_dart = cv2.resize(image_without_dart, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+cv2.imshow("Board without dart", image_without_dart)
+
+image_with_dart = cv2.imread("images/board_20.png")
+image_with_dart = cv2.resize(image_with_dart, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+cv2.imshow("Board with dart", image_with_dart)
+
+dart_x, dart_y = DartLocalization.find_dart_point(image_without_dart, image_with_dart)
+
+cv2.circle(image_with_dart, (int(dart_x), int(dart_y)), radius=10, color=(0,255,0), thickness=2)
+cv2.imshow("Point", image_with_dart)
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()

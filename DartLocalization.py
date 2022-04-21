@@ -1,3 +1,4 @@
+from datetime import datetime
 import cv2
 import numpy as np
 class DartLocalization:
@@ -17,6 +18,9 @@ class DartLocalization:
         image_dilated = cv2.dilate(image_thresh, kernel, iterations=1)
 
         image_eroded = cv2.erode(image_dilated, kernel, iterations=1)
+
+        # Process manually
+        start_time = datetime.now()
 
         rows,cols = image_eroded.shape
         x_sum = 0
@@ -45,4 +49,27 @@ class DartLocalization:
                         max_x = x
                         max_y = y
                         max_distance = distance
+
+        end_time = datetime.now()
+        print("Processing manually took " + str((end_time-start_time).total_seconds()*1000) + "ms")
+
+        # Process with OpenCV
+        start_time = datetime.now()
+
+        # calculate center of mass of white pixels in binary image
+        # calculate x,y coordinate of center
+        M = cv2.moments(image_eroded)
+        x_average = M["m10"] / M["m00"]
+        y_average = M["m01"] / M["m00"]
+
+        # Find pixel furthest away from center of mass
+        nonzero = cv2.findNonZero(image_eroded)
+        distances = np.sqrt((nonzero[:,:,0] - x_average) ** 2 + (nonzero[:,:,1] - y_average) ** 2) # TODO: np.linalg.norm() ???
+        max_index = np.argmax(distances)
+        max_x = nonzero[max_index,0,0]
+        max_y = nonzero[max_index,0,1]
+
+        end_time = datetime.now()
+        print("Processing with OpenCV took " + str((end_time-start_time).total_seconds()*1000) + "ms")
+
         return max_x, max_y
