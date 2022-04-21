@@ -36,6 +36,6 @@ jobs:
         with: 
           node-version: ${{ matrix.node-version }}
       - run: npm i
-        working-directory: score
+        working-directory: calc
       - run: node index.js
-        working-directory: score
+        working-directory: calc
