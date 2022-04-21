@@ -32,6 +32,6 @@ jobs:
         with: 
           node-version: ${{ matrix.node-version }}
       - run: npm i
-      - name: npm init
-        run: npm init -y
+        working-directory: score
       - run: npm run build --if-present
+        working-directory: score
