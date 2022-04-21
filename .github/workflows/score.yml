@@ -34,4 +34,9 @@ jobs:
       - run: npm i
       - name: npm init
         run: npm init -y
+<<<<<<< HEAD
       - run: npm run build --if-present
+=======
+      - run: npm run build --if-present
+      - run: npm test
+>>>>>>> 1b716a6dc95ff07f077e0c954f92f6b2da357fb6
