@@ -1,3 +1,5 @@
+import cv2 as cv
+
 class RegionSegmenter:
     '''
     Class that segments an image of the dart board (no dart!)
@@ -27,10 +29,22 @@ class RegionSegmenter:
         self.mask_inner_bullseye = None
         self.mask_outer_bullseye = None
 
+        self.bbox = None
+
     def segment(self):   
         raise NotImplementedError
     def crop_board(self):
-        raise NotImplementedError
+        grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+
+        ret, thresholded = cv.threshold(grayscale, 0, 255, cv.THRESH_OTSU)
+        thresholded = cv.bitwise_not(thresholded)
+
+        self.bbox = cv.boundingRect(thresholded)
+        x, y, w, h = self.bbox
+
+        foreground = img[y:y+h, x:x+w]
+        return foreground
+        
     def multiplier_mask(self):
         raise NotImplementedError
     def divide_multiplier_mask(self):
