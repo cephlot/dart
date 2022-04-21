@@ -22,6 +22,8 @@ class RegionSegmenter:
     '''
     def __init__(self, image):
         self.image = image
+        self.foreground = None
+        self.scoring_region = None
         self.mask_3x = None
         self.mask_2x = None
         self.mask_1x = None
@@ -43,13 +45,54 @@ class RegionSegmenter:
         x, y, w, h = self.bbox
 
         foreground = img[y:y+h, x:x+w]
-        return foreground
-        
-    def multiplier_mask(self):
+        this.foreground = foreground
+
+    def multiplier_mask():
+        grayscale = cv.cvtColor(background, cv.COLOR_BGR2GRAY)
+        grayscale = cv.cvtColor(grayscale, cv.COLOR_GRAY2RGB)
+
+        colors = cv.subtract(background, grayscale)
+        grayscale2 = cv.cvtColor(colors, cv.COLOR_BGR2GRAY)
+        ret, thresholded = cv.threshold(grayscale2, 0, 255, cv.THRESH_OTSU)
+
+        return thresholded
+
+    def scoring_region(self):
+        kernel = np.ones((6, 6), np.uint8)
+
+        color_mask = multiplier_mask()
+
+        image = cv.dilate(color_mask, kernel)
+        image = cv.erode(image, kernel) 
+
+        contours, hierarchy = 
+            cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+        largets_area = 0
+        largest_contour = None
+
+        for cnt in contours:
+            area = cv.contourArea(cnt)
+            if (area > largets_area):
+                largets_area = area
+                largest_contour = cnt
+
+        cv.fillPoly(image, pts =[largest_contour], color=255)
+
+        kernel = np.ones((50, 50), np.uint8)
+        image = cv.erode(image, kernel)
+        image = cv.dilate(image, kernel)
+
+        self.scoring_region = image
+
+    def get_mask_1x(self):
         raise NotImplementedError
-    def divide_multiplier_mask(self):
+
+    def get_mask_2x(self):
         raise NotImplementedError
-    def create_singular_multiplier_mask(self):
+
+    def get_mask_3x(self):
         raise NotImplementedError
+
     def create_point_mask(self):
         raise NotImplementedError
