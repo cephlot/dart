@@ -1,4 +1,4 @@
-from Helpers.PointMaskHelper import generate_mask
+from Helpers.PointMaskHelper import generate_point_mask
 
 
 class RegionSegmenter:
@@ -41,4 +41,4 @@ class RegionSegmenter:
     def create_singular_multiplier_mask(self):
         raise NotImplementedError
     def create_point_mask(self):
-        self.mask_points = generate_mask(self.image)
+        self.mask_points = generate_point_mask(self.image)
