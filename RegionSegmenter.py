@@ -86,7 +86,12 @@ class RegionSegmenter:
         self.score = image
 
     def get_mask_1x(self):
-        raise NotImplementedError
+        kernel = np.ones((6, 6), np.uint8)
+        image = cv.subtract(self.score, self.multiplier_mask())
+        image = cv.erode(image, kernel)
+        image = cv.dilate(image, kernel)
+
+        return image
 
     def get_mask_2x(self):
         raise NotImplementedError
