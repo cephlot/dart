@@ -1,4 +1,5 @@
 import cv2 as cv
+import numpy as np
 
 class RegionSegmenter:
     '''
@@ -23,7 +24,7 @@ class RegionSegmenter:
     def __init__(self, image):
         self.image = image
         self.foreground = None
-        self.scoring_region = None
+        self.score = None
         self.mask_3x = None
         self.mask_2x = None
         self.mask_1x = None
@@ -44,14 +45,14 @@ class RegionSegmenter:
         self.bbox = cv.boundingRect(thresholded)
         x, y, w, h = self.bbox
 
-        foreground = img[y:y+h, x:x+w]
-        this.foreground = foreground
+        foreground = self.image[y:y+h, x:x+w]
+        self.foreground = foreground
 
-    def multiplier_mask():
-        grayscale = cv.cvtColor(background, cv.COLOR_BGR2GRAY)
+    def multiplier_mask(self):
+        grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
         grayscale = cv.cvtColor(grayscale, cv.COLOR_GRAY2RGB)
 
-        colors = cv.subtract(background, grayscale)
+        colors = cv.subtract(self.image, grayscale)
         grayscale2 = cv.cvtColor(colors, cv.COLOR_BGR2GRAY)
         ret, thresholded = cv.threshold(grayscale2, 0, 255, cv.THRESH_OTSU)
 
@@ -60,13 +61,12 @@ class RegionSegmenter:
     def scoring_region(self):
         kernel = np.ones((6, 6), np.uint8)
 
-        color_mask = multiplier_mask()
+        color_mask = self.multiplier_mask()
 
         image = cv.dilate(color_mask, kernel)
         image = cv.erode(image, kernel) 
 
-        contours, hierarchy = 
-            cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
         largets_area = 0
         largest_contour = None
@@ -83,10 +83,15 @@ class RegionSegmenter:
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
-        self.scoring_region = image
+        self.score = image
 
     def get_mask_1x(self):
-        raise NotImplementedError
+        kernel = np.ones((6, 6), np.uint8)
+        image = cv.subtract(self.score, self.multiplier_mask())
+        image = cv.erode(image, kernel)
+        image = cv.dilate(image, kernel)
+
+        return image
 
     def get_mask_2x(self):
         raise NotImplementedError
