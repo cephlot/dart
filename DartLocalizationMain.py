@@ -2,15 +2,9 @@ from datetime import datetime
 import cv2
 from DartLocalization import DartLocalization
 
-scale = 1
-
 image_without_dart = cv2.imread("images/board_empty.png")
-image_without_dart = cv2.resize(image_without_dart, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
-# cv2.imshow("Board without dart", image_without_dart)
 
 image_with_dart = cv2.imread("images/board_20.png")
-image_with_dart = cv2.resize(image_with_dart, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
-# cv2.imshow("Board with dart", image_with_dart)
 
 start_time = datetime.now()
 dart_x, dart_y = DartLocalization.find_dart_point(image_without_dart, image_with_dart)
