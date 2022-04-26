@@ -23,8 +23,8 @@ class RegionSegmenter:
     '''
     def __init__(self, image):
         self.image = image
+        self.color_mask = None
         self.foreground = None
-        self.score = None
         self.mask_3x = None
         self.mask_2x = None
         self.mask_1x = None
@@ -56,6 +56,7 @@ class RegionSegmenter:
         grayscale2 = cv.cvtColor(colors, cv.COLOR_BGR2GRAY)
         ret, thresholded = cv.threshold(grayscale2, 0, 255, cv.THRESH_OTSU)
 
+        self.color_mask = thresholded
         return thresholded
 
     def scoring_region(self):
@@ -83,11 +84,11 @@ class RegionSegmenter:
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
-        self.score = image
+        self.mask_points = image
 
     def get_mask_1x(self):
         kernel = np.ones((6, 6), np.uint8)
-        image = cv.subtract(self.score, self.multiplier_mask())
+        image = cv.subtract(self.mask_points, self.multiplier_mask())
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
@@ -110,7 +111,7 @@ class RegionSegmenter:
 
         cv.fillPoly(image, pts =[largest_contour], color=255)
 
-        result = cv.subtract(self.score, image)
+        result = cv.subtract(self.mask_points, image)
 
         self.mask_2x = result
         return result
@@ -155,7 +156,32 @@ class RegionSegmenter:
 
         blank = cv.subtract(blank, blank2)
 
+        self.mask_3x = blank
         return blank
+
+    def get_bullseye_masks(self):
+        
+        bullseye = cv.subtract(self.mask_points, self.mask_1x)
+        bullseye = cv.subtract(bullseye, self.mask_2x)
+        bullseye = cv.subtract(bullseye, self.mask_3x)
+
+        bullseye = cv.bitwise_and(bullseye, self.color_mask, mask = None)
+
+        contours, hierarchy = cv.findContours(bullseye, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
+
+        inner_bullseye = np.zeros(bullseye.shape, np.uint8)
+        cv.fillPoly(inner_bullseye, pts =[cnts[1]], color=255)
+
+        outer_bullseye = np.zeros(bullseye.shape, np.uint8)
+        cv.fillPoly(outer_bullseye, pts =[cnts[0]], color=255)
+
+        outer_bullseye = cv.subtract(outer_bullseye, inner_bullseye)
+
+        self.mask_inner_bullseye = inner_bullseye
+        self.mask_outer_bullseye = outer_bullseye
+        return outer_bullseye, inner_bullseye
+
 
     def create_point_mask(self):
         raise NotImplementedError
