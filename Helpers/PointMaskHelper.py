@@ -63,25 +63,25 @@ def fillSegments(image):
     image2 = image.copy()
     h,w = image2.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    region = 255
+    region = 1
     for x in range(w):
         # Top Border
         if(image2[0,x] == 0):
             cv2.floodFill(image2, mask, (x,0), (region))
-            region -= 10
+            region +=1
         # Bottom Border
         if(image2[h-1,x] == 0):
             cv2.floodFill(image2, mask, (x,h-1), (region))
-            region -= 10
+            region +=1
     for y in range(h):
         # Left Border
         if(image2[y,0] == 0):
             cv2.floodFill(image2, mask, (0,y), (region))
-            region -= 10
+            region +=1
         # Right Border
         if(image2[y,w-1] == 0):
             cv2.floodFill(image2, mask, (w-1,y), (region))
-            region -= 10
+            region +=1
     return image2
 
 
