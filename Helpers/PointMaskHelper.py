@@ -46,7 +46,6 @@ def generate_point_mask(image):
     
     filledImage = fillSegments(lineImage)
     filledImage = filledImage - lineImage
-    cv2.imwrite('/mnt/c/dart/pics/filledImage.png', filledImage)
     return filledImage
 
 '''
@@ -107,7 +106,3 @@ def exists_line(theta, list):
         if(abs(d) < 10):
             return True
     return False
-
-
-image = cv2.imread('/mnt/c/dart/pics/pic.png') 
-generate_point_mask(image)
