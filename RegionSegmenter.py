@@ -25,6 +25,7 @@ class RegionSegmenter:
         self.image = image
         self.color_mask = None
         self.foreground = None
+        self.mask_scoring_area = None
         self.mask_3x = None
         self.mask_2x = None
         self.mask_1x = None
@@ -84,11 +85,11 @@ class RegionSegmenter:
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
-        self.mask_points = image
+        self.mask_scoring_area = image
 
     def get_mask_1x(self):
         kernel = np.ones((6, 6), np.uint8)
-        image = cv.subtract(self.mask_points, self.multiplier_mask())
+        image = cv.subtract(self.mask_scoring_area, self.multiplier_mask())
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
@@ -111,7 +112,7 @@ class RegionSegmenter:
 
         cv.fillPoly(image, pts =[largest_contour], color=255)
 
-        result = cv.subtract(self.mask_points, image)
+        result = cv.subtract(self.mask_scoring_area, image)
 
         self.mask_2x = result
         return result
@@ -161,7 +162,7 @@ class RegionSegmenter:
 
     def get_bullseye_masks(self):
         
-        bullseye = cv.subtract(self.mask_points, self.mask_1x)
+        bullseye = cv.subtract(self.mask_scoring_area, self.mask_1x)
         bullseye = cv.subtract(bullseye, self.mask_2x)
         bullseye = cv.subtract(bullseye, self.mask_3x)
 
