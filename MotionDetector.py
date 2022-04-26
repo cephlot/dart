@@ -36,9 +36,9 @@ class MotionDetector:
             ret, frame = self.cap.read()
             if not ret:
                 raise IOError("Cannot read frame")
-            frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+            # frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            processed_frame = cv2.GaussianBlur(src=frame_gray, ksize=(5,5), sigmaX=0)
+            processed_frame = cv2.GaussianBlur(src=frame_gray, ksize=(9,9), sigmaX=0)
 
             if previous_frame is None:
                 previous_frame = processed_frame
@@ -48,7 +48,7 @@ class MotionDetector:
             previous_frame = processed_frame
             previous_frames.append(frame)
             previous_frames = previous_frames[-5:]
-            thresh_frame = cv2.threshold(src=diff_frame, thresh=20, maxval=255, type=cv2.THRESH_BINARY)[1]
+            thresh_frame = cv2.threshold(src=diff_frame, thresh=30, maxval=255, type=cv2.THRESH_BINARY)[1]
 
             # cv2.imshow("Threshold", thresh_frame)
 
