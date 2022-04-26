@@ -1,3 +1,5 @@
+from Helpers.PointMaskHelper import generate_point_mask
+
 import cv2 as cv
 import numpy as np
 
@@ -158,4 +160,4 @@ class RegionSegmenter:
         return blank
 
     def create_point_mask(self):
-        raise NotImplementedError
+        self.mask_points = generate_point_mask(self.image)
