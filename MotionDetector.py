@@ -10,7 +10,7 @@ class MotionDetector:
         elif platform == "darwin":
             self.cap = cv2.VideoCapture(1)
         elif platform == "win32":
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(1)
         else:
             raise RuntimeError("Unknown operating system")
 
@@ -19,6 +19,7 @@ class MotionDetector:
 
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        print("Waiting for motion...")
 
     def __del__(self):
         self.cap.release()
@@ -28,6 +29,8 @@ class MotionDetector:
         frame_after_motion = None
         previous_frame = None
         waiting_for_motion_end = False
+
+        previous_frames = []
 
         while True:
             ret, frame = self.cap.read()
@@ -43,17 +46,24 @@ class MotionDetector:
 
             diff_frame = cv2.absdiff(src1=previous_frame, src2=processed_frame)
             previous_frame = processed_frame
-            thresh_frame = cv2.threshold(src=diff_frame, thresh=50, maxval=255, type=cv2.THRESH_BINARY)[1]
+            previous_frames.append(frame)
+            previous_frames = previous_frames[-5:]
+            thresh_frame = cv2.threshold(src=diff_frame, thresh=20, maxval=255, type=cv2.THRESH_BINARY)[1]
+
+            # cv2.imshow("Threshold", thresh_frame)
 
             if thresh_frame.any():
                 if not waiting_for_motion_end:
                     print("Motion detected!")
-                    frame_before_motion = previous_frame
+                    # frame_before_motion = previous_frame
+                    frame_before_motion = previous_frames[0]
                     waiting_for_motion_end = True
                 waiting_start = datetime.now()
             elif waiting_for_motion_end and (datetime.now() - waiting_start).total_seconds() >= 0.5:
                 # No motion for at least 1s
-                frame_after_motion = processed_frame
+                print("Motion stopped!")
+                frame_after_motion = frame
                 waiting_for_motion_end = False
                 return frame_before_motion, frame_after_motion
-            sleep(0.1)
+            # cv2.imshow("Frame", frame)
+            sleep(0.001)
