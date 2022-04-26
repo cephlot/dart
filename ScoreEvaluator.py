@@ -1,4 +1,8 @@
 
+from DartLocalization import DartLocalization
+from RegionSegmenter import RegionSegmenter
+
+
 class ScoreEvaluator:
     '''
     Class that evaluates a score based on background image of board and image 
@@ -18,5 +22,21 @@ class ScoreEvaluator:
 
     # Uses the RegionSegmenter and dart localizer thingy to score
     def evaluate(self):
-        raise NotImplementedError
-        # return score
+        segmenter = RegionSegmenter(self.image_B)
+        x, y = DartLocalization.find_dart_point(self.image_B, self.Image_I)
+        multiplier = 0
+
+        if segmenter.mask_inner_bullseye[x][y]:
+            return 50
+        elif segmenter.mask_inner_bullseye[x][y]:
+            return 25
+        elif segmenter.mask_3x[x][y]:
+            multiplier = 3
+        elif segmenter.mask_2x[x][y]:
+            multiplier = 2
+        elif segmenter.mask_1x[x][y]:
+            multiplier = 1
+        else:
+            return 0
+
+        return segmenter.mask_points[x][y]*multiplier
