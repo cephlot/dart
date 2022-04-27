@@ -24,6 +24,9 @@ class ScoreEvaluator:
     def evaluate(self):
         segmenter = RegionSegmenter(self.image_B)
         x, y = DartLocalization.find_dart_point(self.image_B, self.image_I)
+        if x < 0 and y < 0:
+            print('No dart')
+            return 0
         multiplier = 0
 
         segmenter.segment(6)
