@@ -32,7 +32,9 @@ class MotionDetector:
             self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
             self.caps[i].set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
             self.caps[i].set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-            if not self.caps[i].isOpened():
+            width = self.caps[i].get(cv2.CAP_PROP_FRAME_WIDTH)
+            height = self.caps[i].get(cv2.CAP_PROP_FRAME_HEIGHT)
+            if not self.caps[i].isOpened() or width != 1280 or height != 720:
                 raise IOError("Couldn't open camera " + str(self.camera_indices[i]))
 
     def read_frames(self):
