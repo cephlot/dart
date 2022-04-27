@@ -37,10 +37,13 @@ def draw_lines(lineImage, lines):
     range = 10
     # index of lines in order to seperate them
     while i < range:
-        if(i == len(lines)):
-            print('HoughLines failed: Not enough unique lines detected')
-            raise IndexError
-        line = lines[i]
+        line = (0,0)
+        try:         
+            line = lines[i]
+        except Exception as exception:
+            print("Exception: {}".format(type(exception).__name__))
+            print("Exception message: {}".format(exception))    
+            return lineImage    
         rho, theta = line[0]
         a = np.cos(theta)
         b = np.sin(theta)
