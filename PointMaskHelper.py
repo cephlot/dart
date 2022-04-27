@@ -19,17 +19,28 @@ def generate_point_mask(image, score_region, closest_score ):
     return
         the same image as the parametre but with added lines.
     '''
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cann_img = cv2.Canny(image_gray,100,200)
-    image_cropped = cv2.bitwise_and(cann_img, score_region, mask = None) 
-    lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
-    # Black out entire image
-    h,w = image.shape[:2]
-    lineImage = np.zeros((h,w,1), dtype = "uint8")
+    image_cropped = preprocess(image, score_region)
+    lineImage, lines = getLines(image_cropped)
     lineImage = draw_lines(lineImage, lines)
     filledImage = fillSegments(lineImage, closest_score)
     filledImage = filledImage - lineImage
     return filledImage
+
+def preprocess(image, score_region):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cann_img = cv2.Canny(image_gray,100,200)
+    image_cropped = cv2.bitwise_and(cann_img, score_region, mask = None) 
+    kernel = np.ones((10, 10), np.uint8)
+    image_cropped = cv2.dilate(image_cropped, kernel)
+    image_cropped = cv2.erode(image_cropped, kernel) 
+    return image_cropped
+
+def getLines(image_cropped):
+    lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
+    h,w = image_cropped.shape[:2]
+    lineImage = np.zeros((h,w,1), dtype = "uint8")
+    return lineImage, lines
+ 
 
 def draw_lines(lineImage, lines):
     angle_list = []
@@ -41,9 +52,10 @@ def draw_lines(lineImage, lines):
         try:         
             line = lines[i]
         except Exception as exception:
+            print("Not enough distinct lines for Point Mask")
             print("Exception: {}".format(type(exception).__name__))
             print("Exception message: {}".format(exception))    
-            return lineImage    
+            return lineImage
         rho, theta = line[0]
         a = np.cos(theta)
         b = np.sin(theta)
@@ -60,9 +72,6 @@ def draw_lines(lineImage, lines):
             cv2.line(lineImage,(x1,y1),(x2,y2),(255),1)
         i += 1
     return lineImage
-
-
-
 
 
 
