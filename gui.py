@@ -11,24 +11,27 @@ window.attributes('-fullscreen', True)
 
 frame = Frame()
 
-score = Label(frame, text='Welcome to dart!', font=('Courier', 44), bg='white')
-score.config(anchor=CENTER)
+
 
 frame.pack(expand=True)
 score.pack()
 
 def eval():
     # Put dart logic here!
+    score = Label(frame, text='Welcome to dart!', font=('Courier', 44), bg='white')
+    score.config(anchor=CENTER)
+
     dart = Dart()
     while True:
         for i in range(2):
             score.config(text=f'Player {i+1}')
             time.sleep(3)
+            val = 0;
 
             for i in range(3):
                 window.config(bg='green')
                 score.config(text='Score: ')
-                val = dart.start_round()
+                val += dart.start_round()
                 score.config(text=f'Score: {val}')
                 window.config(bg='white')
                 time.sleep(5)
