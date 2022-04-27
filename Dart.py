@@ -12,17 +12,15 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
 
-    def __del__(self):
-        self.detector.__del__()
-
     def start_round(self):
         frames_before, frames_after = self.detector.wait_for_motion()
         scores = Counter()
-        
+        regions = [6, 11]
+
         for i, frame in enumerate(frames_before):
-            evaluator = ScoreEvaluator(frame, frames_after[i])
+            evaluator = ScoreEvaluator(frame, frames_after[i], regions[i])
             scores[i] = evaluator.evaluate()
 
-        #value, _ = scores.most_common()
+        value, _ = scores.most_common()
 
-        return scores[0]
+        return value

@@ -15,11 +15,12 @@ frame.pack(expand=True)
 def eval():
     # Put dart logic here!
     dart = Dart()
-    
+    score = Label(frame, font=('Courier',44), bg='white')
+    score.config(anchor=CENTER)
+    score.pack()
+
     while True:
-        score = Label(frame, text='Welcome to dart!', font=('Courier', 44), bg='white')
-        score.pack()
-        score.config(anchor=CENTER)
+        score.config(text='Welcome to dart!', bg='white')
 
         time.sleep(5)
         for i in range(2):
