@@ -1,7 +1,6 @@
-from Helpers.PointMaskHelper import generate_point_mask
-
 import cv2 as cv
 import numpy as np
+from PointMaskHelper import generate_point_mask
 
 class RegionSegmenter:
     '''
@@ -45,7 +44,10 @@ class RegionSegmenter:
 
         self.bbox = None
 
-    def segment(self):   
+    def segment(self, closest_score):   
+        '''
+        OBS: set closest_score to score region nearest camera
+        '''
         self.crop_board()
         self.multiplier_mask()
         self.scoring_region()
@@ -53,6 +55,7 @@ class RegionSegmenter:
         self.get_mask_2x()
         self.get_mask_3x()
         self.get_bullseye_masks()
+        self.create_point_mask(closest_score)
         
     def crop_board(self):
 
@@ -180,5 +183,11 @@ class RegionSegmenter:
         self.mask_inner_bullseye = inner_bullseye
         self.mask_outer_bullseye = outer_bullseye
 
-    def create_point_mask(self):
-        self.mask_points = generate_point_mask(self.image)
+    
+    def create_point_mask(self, closest_score):
+        '''
+        Generates the point mask for the board. Give the point of the
+        region to the bottom middle of the image in order for
+        point regions to be assigned correctly!
+        '''
+        self.mask_points = generate_point_mask(self.foreground, closest_score)
