@@ -1,6 +1,7 @@
 from tkinter import *
 import time
 import threading
+from Dart import Dart
 import ScoreEvaluator
 
 window = Tk()
@@ -17,8 +18,8 @@ score.pack()
 
 def eval():
     # Put dart logic here!
-    i = 7
-    score.config(text=f'Score: {i}')
+    dart = Dart()
+    score.config(text=f'Score: {dart.start_round()}')
 
 x = threading.Thread(target=eval)
 x.start()
