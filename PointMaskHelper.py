@@ -41,9 +41,10 @@ def draw_lines(lineImage, lines):
         try:         
             line = lines[i]
         except Exception as exception:
+            print("Not enough distinct lines for Point Mask")
             print("Exception: {}".format(type(exception).__name__))
             print("Exception message: {}".format(exception))    
-            return lineImage    
+            return lineImage
         rho, theta = line[0]
         a = np.cos(theta)
         b = np.sin(theta)
