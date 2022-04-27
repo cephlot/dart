@@ -37,6 +37,9 @@ def draw_lines(lineImage, lines):
     range = 10
     # index of lines in order to seperate them
     while i < range:
+        if(i == len(lines)):
+            print('HoughLines failed: Not enough unique lines detected')
+            raise IndexError
         line = lines[i]
         rho, theta = line[0]
         a = np.cos(theta)
