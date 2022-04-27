@@ -191,4 +191,4 @@ class RegionSegmenter:
         region to the bottom middle of the image in order for
         point regions to be assigned correctly!
         '''
-        self.mask_points = generate_point_mask(self.foreground, closest_score)
+        self.mask_points = generate_point_mask(self.foreground, self.mask_scoring_area, closest_score)

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def generate_point_mask(image, seed):
+def generate_point_mask(image, score_region, closest_score ):
     '''
     Method to generate a point mask from one image.
     The method will generate 10 lines all with distinct angles. 
@@ -20,11 +20,19 @@ def generate_point_mask(image, seed):
         the same image as the parametre but with added lines.
     '''
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cann_img = cv2.Canny(image_gray,200,300)
-    lines = cv2.HoughLines(cann_img, 1, np.pi/180, 120, np.array([]))
+    cann_img = cv2.Canny(image_gray,100,200)
+    image_cropped = cv2.bitwise_and(cann_img, score_region, mask = None) 
+    lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
+    cv2.imwrite('/mnt/c/dart/pics/cann_img.png', image_cropped)
     # Black out entire image
     h,w = image.shape[:2]
     lineImage = np.zeros((h,w,1), dtype = "uint8")
+    lineImage = draw_lines(lineImage, lines)
+    filledImage = fillSegments(lineImage, closest_score)
+    filledImage = filledImage - lineImage
+    return filledImage
+
+def draw_lines(lineImage, lines):
     angle_list = []
     i = 0
     range = 10
@@ -36,20 +44,21 @@ def generate_point_mask(image, seed):
         b = np.sin(theta)
         x0 = a*rho
         y0 = b*rho
-        x1 = int(x0 + 1000*(-b))
-        y1 = int(y0 + 1000*(a))
-        x2 = int(x0 - 1000*(-b))
-        y2 = int(y0 - 1000*(a))
+        x1 = int(x0 + 20000*(-b))
+        y1 = int(y0 + 20000*(a))
+        x2 = int(x0 - 20000*(-b))
+        y2 = int(y0 - 20000*(a))
         if(exists_line(theta, angle_list)):
             range += 1
         else:
             angle_list.append(np.round(theta/np.pi*180))
             cv2.line(lineImage,(x1,y1),(x2,y2),(255),1)
         i += 1
-    
-    filledImage = fillSegments(lineImage, seed)
-    filledImage = filledImage - lineImage
-    return filledImage
+    return lineImage
+
+
+
+
 
 
 def fillSegments(image, closest_score):
@@ -96,6 +105,8 @@ def fillSegments(image, closest_score):
             cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
             index = (index + 1) % 20
     return image2
+
+    
 
 
 def exists_line(theta, list):
