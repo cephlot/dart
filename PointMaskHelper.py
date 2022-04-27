@@ -71,7 +71,7 @@ def fillSegments(image, closest_score):
     h,w = image2.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
     # Bottom Mid to Bottom Left
-    for x in range(w/2, 0, -1):
+    for x in range(int(w/2), 0, -1):
         if(image2[h-1,x] == 0):
             cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
             index = (index + 1) % 20
@@ -91,7 +91,7 @@ def fillSegments(image, closest_score):
             cv2.floodFill(image2, mask, (w-1,y), order[index]*12)
             index = (index + 1) % 20
     # Bottom Right to Bottom Mid
-    for x in range(w-1, w/2, -1):
+    for x in range(w-1, int(w/2), -1):
         if(image2[h-1,x] == 0):
             cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
             index = (index + 1) % 20
