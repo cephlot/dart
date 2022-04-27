@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
-'''
+
+def generate_point_mask(image, seed):
+    '''
     Method to generate a point mask from one image.
     The method will generate 10 lines all with distinct angles. 
     This means that each line will segment the board according to the 
@@ -12,10 +14,11 @@ import numpy as np
     -----------
     image
         the image to generate lines from
+    seed   
+        The point region nearest the mounted camera (center bottom of image)
     return
         the same image as the parametre but with added lines.
-'''
-def generate_point_mask(image):
+    '''
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     cann_img = cv2.Canny(image_gray,200,300)
     lines = cv2.HoughLines(cann_img, 1, np.pi/180, 120, np.array([]))
@@ -44,48 +47,59 @@ def generate_point_mask(image):
             cv2.line(lineImage,(x1,y1),(x2,y2),(255),1)
         i += 1
     
-    filledImage = fillSegments(lineImage)
+    filledImage = fillSegments(lineImage, seed)
     filledImage = filledImage - lineImage
     return filledImage
 
-'''
+
+def fillSegments(image, closest_score):
+    '''
     Helper method that fills each segment
     with a unique colour. Colours range from
     1 to 20 in grayscale (1 dimension)
     -----------
     image
         Image to fill
+    closest_score
+        The Score region closest to the camera
     return
         Segmented Image
-'''
-def fillSegments(image):
+    '''
+    order = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5]
+    index = order.index(closest_score)
     image2 = image.copy()
     h,w = image2.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    region = 1
-    for x in range(w):
-        # Top Border
-        if(image2[0,x] == 0):
-            cv2.floodFill(image2, mask, (x,0), (region))
-            region +=1
-        # Bottom Border
+    # Bottom Mid to Bottom Left
+    for x in range(w/2, 0, -1):
         if(image2[h-1,x] == 0):
-            cv2.floodFill(image2, mask, (x,h-1), (region))
-            region +=1
-    for y in range(h):
-        # Left Border
-        if(image2[y,0] == 0):
-            cv2.floodFill(image2, mask, (0,y), (region))
-            region +=1
-        # Right Border
-        if(image2[y,w-1] == 0):
-            cv2.floodFill(image2, mask, (w-1,y), (region))
-            region +=1
+            cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
+            index = (index + 1) % 20
+    # Bottom Left to Top Left
+    for y in range(h-1, 0, -1):
+        if(image2[y, 0] == 0):
+            cv2.floodFill(image2, mask, (0,y), order[index]*12)
+            index = (index + 1) % 20
+    # Top Left to Top Right
+    for x in range(0, w-1):
+        if(image2[0,x] == 0):
+            cv2.floodFill(image2, mask, (x,0), order[index]*12)
+            index = (index + 1) % 20
+    # Top Right to Bottom Right
+    for y in range(0, h-1):
+        if(image2[y, w-1] == 0):
+            cv2.floodFill(image2, mask, (w-1,y), order[index]*12)
+            index = (index + 1) % 20
+    # Bottom Right to Bottom Mid
+    for x in range(w-1, w/2, -1):
+        if(image2[h-1,x] == 0):
+            cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
+            index = (index + 1) % 20
     return image2
 
 
-
-'''
+def exists_line(theta, list):
+    '''
     Helper method that checks if the angle theta
     is too close to antother already saved angle in list. 
     Parametres
@@ -97,8 +111,7 @@ def fillSegments(image):
     return
         True if a line in the list is the same as theta
         False if no line matches theta
-'''
-def exists_line(theta, list):
+    '''
     angle = np.round(theta/np.pi*180)
     for a in list:
         d = a - angle
