@@ -9,10 +9,18 @@ class RegionSegmenter:
     ------------
     image
         the image of a dart board
-    mask3x
+    color_mask
+        The extracted color mask from the image
+    foreground
+        The cropped dart board
+    mask_scoring_area
+        the mask of the entire scoring area
+    mask_3x
         mask of 3x multiplier regions
-    mask2x
+    mask_2x
         mask of 2x multiplier regions
+    mask_1x
+        mask of the 1x multiplier region
     mask_points
         mask of point regions
     mask_outer_bullseye
@@ -38,90 +46,81 @@ class RegionSegmenter:
     def segment(self):   
         raise NotImplementedError
     def crop_board(self):
-        grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
 
+        # Create a greyscale of the board and use otsu to extract the foreground
+        grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
         ret, thresholded = cv.threshold(grayscale, 0, 255, cv.THRESH_OTSU)
         thresholded = cv.bitwise_not(thresholded)
 
+        # Create a bounding rectangle containing only the foreground
         self.bbox = cv.boundingRect(thresholded)
         x, y, w, h = self.bbox
 
+        # Extract the foreground using the bounding box
         foreground = self.image[y:y+h, x:x+w]
         self.foreground = foreground
 
     def multiplier_mask(self):
-        grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
+        # Make a 3-channel greyscale version of the image
+        grayscale = cv.cvtColor(self.foreground, cv.COLOR_BGR2GRAY)
         grayscale = cv.cvtColor(grayscale, cv.COLOR_GRAY2RGB)
 
-        colors = cv.subtract(self.image, grayscale)
+        # Extract only the colors by subtracting the greyscale
+        colors = cv.subtract(self.foreground, grayscale)
         grayscale2 = cv.cvtColor(colors, cv.COLOR_BGR2GRAY)
+
+        # Use otsu to get a black and white mask for the color region
         ret, thresholded = cv.threshold(grayscale2, 0, 255, cv.THRESH_OTSU)
 
         self.color_mask = thresholded
-        return thresholded
 
     def scoring_region(self):
+
+        # Dilate and erode the color mask to get rid of unwanted garbage
         kernel = np.ones((6, 6), np.uint8)
-
-        color_mask = self.multiplier_mask()
-
-        image = cv.dilate(color_mask, kernel)
+        image = cv.dilate(self.color_mask, kernel)
         image = cv.erode(image, kernel) 
 
+        # Find the largest contour and fill it to create a mask of the scoring area
         contours, hierarchy = cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
-        largets_area = 0
-        largest_contour = None
+        area = np.zeros(image.shape, np.uint8)
+        cv.fillPoly(area, pts=[cnts[0]], color=255)
 
-        for cnt in contours:
-            area = cv.contourArea(cnt)
-            if (area > largets_area):
-                largets_area = area
-                largest_contour = cnt
-
-        cv.fillPoly(image, pts =[largest_contour], color=255)
-
-        kernel = np.ones((50, 50), np.uint8)
-        image = cv.erode(image, kernel)
-        image = cv.dilate(image, kernel)
-
-        self.mask_scoring_area = image
+        self.mask_scoring_area = area
 
     def get_mask_1x(self):
+        image = cv.subtract(self.mask_scoring_area, self.color_mask)
+
+        # Erode and dilate to clean the image
         kernel = np.ones((6, 6), np.uint8)
-        image = cv.subtract(self.mask_scoring_area, self.multiplier_mask())
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
         self.mask_1x = image
-        return image
 
     def get_mask_2x(self):
+
+        # Find the largest contour in the 1x score mask
         contours, hierarchy = cv.findContours(self.mask_1x, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
-        largets_area = 0
-        largest_contour = None
-
-        for cnt in contours:
-            area = cv.contourArea(cnt)
-            if (area > largets_area):
-                largets_area = area
-                largest_contour = cnt
-
+        # Fill the contour
         image = np.zeros(self.mask_1x.shape, np.uint8)
+        cv.fillPoly(image, pts =[cnts[0]], color=255)
 
-        cv.fillPoly(image, pts =[largest_contour], color=255)
-
+        # subtract the filled contour from the scoring area to get the 2x ring mask
         result = cv.subtract(self.mask_scoring_area, image)
 
         self.mask_2x = result
-        return result
 
     def get_mask_3x(self):
 
-        color_mask = self.multiplier_mask()
+        color_mask = self.color_mask
         image = cv.subtract(color_mask, self.mask_2x)
 
+        # Erode and dilate to get rid of unwanted garbage
         kernel = np.ones((4, 4), np.uint8)
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
@@ -130,42 +129,32 @@ class RegionSegmenter:
         image = cv.dilate(image, kernel)
         image = cv.erode(image, kernel)
 
+        # Fill the largest contour 
         contours, hierarchy = cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-
-        largets_area = 0
-        largest_contour = None
-
-        for cnt in contours:
-            area = cv.contourArea(cnt)
-            if (area > largets_area):
-                largets_area = area
-                largest_contour = cnt
+        cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
         blank = np.zeros(image.shape, np.uint8)
-        cv.fillPoly(blank, pts =[largest_contour], color=255)
+        cv.fillPoly(blank, pts =[cnts[0]], color=255)
 
-        cv.drawContours(blank, [largest_contour], -1, 255, 1)
+        # Gets the 3x multiplier and bullseye zone
         blank = cv.subtract(blank, self.mask_1x)
-
-        new_image = blank.copy()
-
-        contours, hierarchy = cv.findContours(blank, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
         blank2 = np.zeros(image.shape, np.uint8)
         cv.fillPoly(blank2, pts =[cnts[1]], color=255)
 
-        blank = cv.subtract(blank, blank2)
+        # Get rid of the bullseye zone
+        mask_3x = cv.subtract(blank, blank2)
 
-        self.mask_3x = blank
-        return blank
+        self.mask_3x = mask_3x
 
     def get_bullseye_masks(self):
         
+        # Subtract the different multipliers from the scoring region
         bullseye = cv.subtract(self.mask_scoring_area, self.mask_1x)
         bullseye = cv.subtract(bullseye, self.mask_2x)
         bullseye = cv.subtract(bullseye, self.mask_3x)
 
+        # extracts the 2 circles from the color mask (instead of one big circle)
         bullseye = cv.bitwise_and(bullseye, self.color_mask, mask = None)
 
         contours, hierarchy = cv.findContours(bullseye, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -181,8 +170,6 @@ class RegionSegmenter:
 
         self.mask_inner_bullseye = inner_bullseye
         self.mask_outer_bullseye = outer_bullseye
-        return outer_bullseye, inner_bullseye
-
 
     def create_point_mask(self):
         raise NotImplementedError
