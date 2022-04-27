@@ -10,15 +10,12 @@ window.geometry('480x290')
 window.attributes('-fullscreen', True)
 
 frame = Frame()
-
-
-
 frame.pack(expand=True)
-score.pack()
 
 def eval():
     # Put dart logic here!
     score = Label(frame, text='Welcome to dart!', font=('Courier', 44), bg='white')
+    score.pack()
     score.config(anchor=CENTER)
 
     dart = Dart()
