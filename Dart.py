@@ -12,6 +12,9 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
 
+    def __del__(self):
+        self.detector.__del__()
+
     def start_round(self):
         frames_before, frames_after = self.detector.wait_for_motion()
         scores = Counter()
@@ -20,6 +23,6 @@ class Dart:
             evaluator = ScoreEvaluator(frame, frames_after[i])
             scores[i] = evaluator.evaluate()
 
-        value, _ = scores.most_common()
+        #value, _ = scores.most_common()
 
-        return value
+        return scores[0]
