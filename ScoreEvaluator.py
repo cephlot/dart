@@ -26,7 +26,7 @@ class ScoreEvaluator:
     def evaluate(self):
         x, y = DartLocalization.find_dart_point(self.image_B, self.image_I)
         if x < 0 and y < 0:
-            print('No dart')
+            print(f'No dart ({x},{y})')
             return 0
         multiplier = 0
 
