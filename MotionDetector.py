@@ -6,64 +6,83 @@ from datetime import datetime
 class MotionDetector:
     def __init__(self):
         if platform == "linux" or platform == "linux2":
-            self.cap = cv2.VideoCapture(0)
+            self.camera_indices = [0,1]
         elif platform == "darwin":
-            self.cap = cv2.VideoCapture(1)
+            self.camera_indices = [1,2]
         elif platform == "win32":
-            self.cap = cv2.VideoCapture(1)
+            self.camera_indices = [1,2]
         else:
             raise RuntimeError("Unknown operating system")
 
-        if not self.cap.isOpened():
-            raise IOError("Cannot open webcam")
+        self.open_cameras()
 
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        # Wait for cameras to stabilize
+        for i in range(50):
+            frames = self.read_frames()
+
         print("Waiting for motion...")
 
     def __del__(self):
-        self.cap.release()
+        for i in range(len(self.caps)):
+            self.caps[i].release()
+
+    def open_cameras(self):
+        self.caps = [None] * len(self.camera_indices)
+        for i in range(len(self.caps)):
+            self.caps[i] = cv2.VideoCapture(self.camera_indices[i], cv2.CAP_DSHOW)
+            self.caps[i].set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            self.caps[i].set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            if not self.caps[i].isOpened():
+                raise IOError("Couldn't open camera " + str(self.camera_indices[i]))
+
+    def read_frames(self):
+        frames = [None] * len(self.caps)
+        for i in range(len(self.caps)):
+            ret, frame = self.caps[i].read()
+            if not ret:
+                raise IOError("Cannot read frame from camera " + str(self.camera_indices[i]))
+            frames[i] = frame
+        return frames
 
     def wait_for_motion(self):
-        frame_before_motion = None
-        frame_after_motion = None
-        previous_frame = None
+        previous_frame = [None] * len(self.caps)
         waiting_for_motion_end = False
 
-        previous_frames = []
+        previous_frames = [[]] * len(self.caps)
 
         while True:
-            ret, frame = self.cap.read()
-            if not ret:
-                raise IOError("Cannot read frame")
-            # frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            processed_frame = cv2.GaussianBlur(src=frame_gray, ksize=(9,9), sigmaX=0)
+            # Get frames from all cameras
+            frames = self.read_frames()
+                
+            for i in range(len(self.caps)):
+                frame = frames[i]
+                # Preprocess frame
+                frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                processed_frame = cv2.GaussianBlur(src=frame_gray, ksize=(9,9), sigmaX=0)
 
-            if previous_frame is None:
-                previous_frame = processed_frame
-                continue
+                if previous_frame[i] is None:
+                    previous_frame[i] = processed_frame
+                    continue
 
-            diff_frame = cv2.absdiff(src1=previous_frame, src2=processed_frame)
-            previous_frame = processed_frame
-            previous_frames.append(frame)
-            previous_frames = previous_frames[-5:]
-            thresh_frame = cv2.threshold(src=diff_frame, thresh=30, maxval=255, type=cv2.THRESH_BINARY)[1]
+                diff_frame = cv2.absdiff(src1=previous_frame[i], src2=processed_frame)
+                previous_frame[i] = processed_frame
+                previous_frames[i].append(frame)
+                previous_frames[i] = previous_frames[i][-5:]
+                thresh_frame = cv2.threshold(src=diff_frame, thresh=30, maxval=255, type=cv2.THRESH_BINARY)[1]
 
-            # cv2.imshow("Threshold", thresh_frame)
-
-            if thresh_frame.any():
-                if not waiting_for_motion_end:
-                    print("Motion detected!")
-                    # frame_before_motion = previous_frame
-                    frame_before_motion = previous_frames[0]
-                    waiting_for_motion_end = True
-                waiting_start = datetime.now()
-            elif waiting_for_motion_end and (datetime.now() - waiting_start).total_seconds() >= 0.5:
-                # No motion for at least 1s
-                print("Motion stopped!")
-                frame_after_motion = frame
-                waiting_for_motion_end = False
-                return frame_before_motion, frame_after_motion
-            # cv2.imshow("Frame", frame)
-            sleep(0.001)
+                if cv2.countNonZero(thresh_frame) > 0:
+                    # Threshold frame contains white pixels
+                    if not waiting_for_motion_end:
+                        print("Motion detected!")
+                        frames_before_motion = [None] * len(self.caps)
+                        for i in range(len(self.caps)):
+                            frames_before_motion[i] = previous_frames[i][0]
+                        waiting_for_motion_end = True
+                    waiting_start = datetime.now()
+                elif waiting_for_motion_end and (datetime.now() - waiting_start).total_seconds() >= 0.5:
+                    # No motion for at least 0.5s
+                    print("Motion stopped!")
+                    frames_after_motion = frames
+                    waiting_for_motion_end = False
+                    return frames_before_motion, frames_after_motion
+                sleep(0.01)

@@ -15,11 +15,6 @@ class DartLocalization:
         image_thresh = cv2.threshold(src=image_gray_diff, thresh=15, maxval=255, type=cv2.THRESH_BINARY)[1]
         # cv2.imshow("Threshold", image_thresh)
 
-        # image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_OPEN, kernel=(3,3), iterations=1)
-        # cv2.imshow("Open", image_thresh)
-        # image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_CLOSE, kernel=(3,3), iterations=1)
-        # cv2.imshow("Close", image_thresh)
-
         small_kernel = np.ones((5,5), np.uint8)
         big_kernel = np.ones((9,9), np.uint8)
         image_thresh = cv2.erode(image_thresh, small_kernel, iterations=1)
@@ -34,9 +29,12 @@ class DartLocalization:
         # cv2.imshow("dart mask", dart_mask)
 
         contours, hierarchy = cv2.findContours(dart_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        c = max(contours, key = cv2.contourArea)
-        x,y,w,h = cv2.boundingRect(c)
+        if len(contours) == 0:
+            raise RuntimeError("No contours")
 
+        c = max(contours, key = cv2.contourArea)
+
+        # x,y,w,h = cv2.boundingRect(c)
         # dart_mask_contour = cv2.cvtColor(dart_mask.copy(), cv2.COLOR_GRAY2BGR)
         # draw the biggest contour (c) in green
         # cv2.rectangle(dart_mask_contour,(x,y),(x+w,y+h),(0,255,0),2)
@@ -44,7 +42,7 @@ class DartLocalization:
 
         # Subtract everything outside contour
         contour_mask = np.zeros((dart_mask.shape[0],dart_mask.shape[1],1), np.uint8)
-        contour_mask = cv2.fillPoly(contour_mask, pts =[c], color=255)
+        contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
         dart_mask = cv2.subtract(dart_mask, cv2.bitwise_not(contour_mask))
         # cv2.imshow("Dart mask subtract", dart_mask)
 
@@ -54,7 +52,6 @@ class DartLocalization:
         center_of_mass_y = m["m01"] / m["m00"]
 
         # dart_mask_copy = dart_mask.copy()
-
         # cv2.circle(dart_mask_copy, (int(center_of_mass_x), int(center_of_mass_y)), 10, 128, 2)
         # cv2.imshow("Center of mass", dart_mask_copy)
 
