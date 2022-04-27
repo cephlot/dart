@@ -23,7 +23,6 @@ def generate_point_mask(image, score_region, closest_score ):
     cann_img = cv2.Canny(image_gray,100,200)
     image_cropped = cv2.bitwise_and(cann_img, score_region, mask = None) 
     lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
-    cv2.imwrite('/mnt/c/dart/pics/cann_img.png', image_cropped)
     # Black out entire image
     h,w = image.shape[:2]
     lineImage = np.zeros((h,w,1), dtype = "uint8")
@@ -82,27 +81,27 @@ def fillSegments(image, closest_score):
     # Bottom Mid to Bottom Left
     for x in range(int(w/2), 0, -1):
         if(image2[h-1,x] == 0):
-            cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
+            cv2.floodFill(image2, mask, (x,h-1), order[index])
             index = (index + 1) % 20
     # Bottom Left to Top Left
     for y in range(h-1, 0, -1):
         if(image2[y, 0] == 0):
-            cv2.floodFill(image2, mask, (0,y), order[index]*12)
+            cv2.floodFill(image2, mask, (0,y), order[index])
             index = (index + 1) % 20
     # Top Left to Top Right
     for x in range(0, w-1):
         if(image2[0,x] == 0):
-            cv2.floodFill(image2, mask, (x,0), order[index]*12)
+            cv2.floodFill(image2, mask, (x,0), order[index])
             index = (index + 1) % 20
     # Top Right to Bottom Right
     for y in range(0, h-1):
         if(image2[y, w-1] == 0):
-            cv2.floodFill(image2, mask, (w-1,y), order[index]*12)
+            cv2.floodFill(image2, mask, (w-1,y), order[index])
             index = (index + 1) % 20
     # Bottom Right to Bottom Mid
     for x in range(w-1, int(w/2), -1):
         if(image2[h-1,x] == 0):
-            cv2.floodFill(image2, mask, (x,h-1), order[index]*12)
+            cv2.floodFill(image2, mask, (x,h-1), order[index])
             index = (index + 1) % 20
     return image2
 
