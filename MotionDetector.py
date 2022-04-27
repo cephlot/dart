@@ -6,7 +6,7 @@ from datetime import datetime
 class MotionDetector:
     def __init__(self):
         if platform == "linux" or platform == "linux2":
-            self.camera_indices = [0]
+            self.camera_indices = [0,2]
         elif platform == "darwin":
             self.camera_indices = [1,2]
         elif platform == "win32":
@@ -70,9 +70,9 @@ class MotionDetector:
                 previous_frame[i] = processed_frame
                 previous_frames[i].append(frame)
                 previous_frames[i] = previous_frames[i][-5:]
-                thresh_frame = cv2.threshold(src=diff_frame, thresh=30, maxval=255, type=cv2.THRESH_BINARY)[1]
+                thresh_frame = cv2.threshold(src=diff_frame, thresh=50, maxval=255, type=cv2.THRESH_BINARY)[1]
 
-                if cv2.countNonZero(thresh_frame) > 0:
+                if cv2.countNonZero(thresh_frame) > 10:
                     # Threshold frame contains white pixels
                     if not waiting_for_motion_end:
                         print("Motion detected!")
