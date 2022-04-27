@@ -20,6 +20,6 @@ class Dart:
             evaluator = ScoreEvaluator(frame, frames_after[i])
             scores[i] = evaluator.evaluate()
 
-        value, _ = scores.most_common()
+        #value, _ = scores.most_common()
 
-        return value
+        return scores[0]
