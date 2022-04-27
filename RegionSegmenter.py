@@ -89,7 +89,7 @@ class RegionSegmenter:
     def scoring_region(self):
 
         # Dilate and erode the color mask to get rid of unwanted garbage
-        kernel = np.ones((6, 6), np.uint8)
+        kernel = np.ones((15, 15), np.uint8)
         image = cv.dilate(self.color_mask, kernel)
         image = cv.erode(image, kernel) 
 
@@ -103,10 +103,11 @@ class RegionSegmenter:
         self.mask_scoring_area = area
 
     def get_mask_1x(self):
+
         image = cv.subtract(self.mask_scoring_area, self.color_mask)
 
         # Erode and dilate to clean the image
-        kernel = np.ones((6, 6), np.uint8)
+        kernel = np.ones((10, 10), np.uint8)
         image = cv.erode(image, kernel)
         image = cv.dilate(image, kernel)
 
