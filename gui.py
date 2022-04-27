@@ -18,9 +18,13 @@ score.pack()
 
 def eval():
     # Put dart logic here!
-    dart = Dart()
-    window.config(bg='green')
-    score.config(text=f'Score: {dart.start_round()}')
+    while True:
+        dart = Dart()
+        window.config(bg='green')
+        score.config(text=f'Score: {dart.start_round()}')
+        time.sleep(5)
+        window.config(bg='grey')
+        dart.__del__()
 
 x = threading.Thread(target=eval)
 x.start()

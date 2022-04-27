@@ -12,6 +12,9 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
 
+    def __del__(self):
+        self.detector.__del__()
+
     def start_round(self):
         frames_before, frames_after = self.detector.wait_for_motion()
         scores = Counter()

@@ -27,18 +27,29 @@ class ScoreEvaluator:
         multiplier = 0
 
         segmenter.segment(6)
+        print(f'x: {x}, y: {y}')
+
+        x1, y1, w, h = segmenter.bbox
+        x = x - x1
+        y = y - y1
 
         if segmenter.mask_inner_bullseye[y][x]:
+            print('bulleye!')
             return 50
-        elif segmenter.mask_inner_bullseye[y][x]:
+        elif segmenter.mask_outer_bullseye[y][x]:
+            print('lesser bullseye')
             return 25
         elif segmenter.mask_3x[y][x]:
+            print('3x')
             multiplier = 3
         elif segmenter.mask_2x[y][x]:
+            print('2x')
             multiplier = 2
         elif segmenter.mask_1x[y][x]:
+            print('1x')
             multiplier = 1
         else:
+            print('outside')
             return 0
 
         print(f'Region: {segmenter.mask_points[y][x]}')
