@@ -44,7 +44,14 @@ class RegionSegmenter:
         self.bbox = None
 
     def segment(self):   
-        raise NotImplementedError
+        self.crop_board()
+        self.multiplier_mask()
+        self.scoring_region()
+        self.get_mask_1x()
+        self.get_mask_2x()
+        self.get_mask_3x()
+        self.get_bullseye_masks()
+        
     def crop_board(self):
 
         # Create a greyscale of the board and use otsu to extract the foreground
