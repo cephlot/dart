@@ -17,7 +17,9 @@ def start_game():
     t.start()
 
 def game():
-    # Put dart logic here!
+    '''
+    Runs a game of dart. Three throws per player, displays score for each throw.
+    '''
     dart = Dart()
     score = Label(window, font=('Courier',44), bg='white')
     score.config(anchor=CENTER)
