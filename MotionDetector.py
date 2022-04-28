@@ -47,6 +47,19 @@ class MotionDetector:
         return frames
 
     def wait_for_motion(self):
+        ''' 
+        Takes photos of background images (image_B) and detected images (image_I) containing a dart for all
+        cameras.
+        Waits for motion that exceeds a threshold. If motion is detected it takes the photos after waiting for motion 
+        to stop.
+        ---------
+        returns
+
+        frames_before_motion
+            List of frames taken before motion is detected. Taken by all cameras.
+        frames_after_motion
+            List of all frames taken after motion is detected. Taken by all cameras
+        '''
         previous_frame = [None] * len(self.caps)
         waiting_for_motion_end = False
 
