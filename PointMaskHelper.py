@@ -42,6 +42,10 @@ def preprocess(image, score_region):
 def getLines(image_cropped):
     '''
     Gets alls the lines returned by HughLines on the cropped image.
+    Parametres
+    -----------
+    image_cropped
+        preprocessed image to get lines from
     '''
     lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
     h,w = image_cropped.shape[:2]
