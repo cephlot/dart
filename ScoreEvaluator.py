@@ -7,8 +7,6 @@ class ScoreEvaluator:
     '''
     Class that evaluates a score based on background image of board and image 
     of board with dart
-
-    Attributes:
     ------------
     image_B
         the image of an empty dart board
