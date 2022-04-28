@@ -42,7 +42,6 @@ def preprocess(image, score_region):
 def getLines(image_cropped):
     '''
     Gets alls the lines returned by HughLines on the cropped image.
-    Parametres
     -----------
     image_cropped
         preprocessed image to get lines from
@@ -142,7 +141,6 @@ def exists_line(theta, list):
     '''
     Helper method that checks if the angle theta
     is too close to antother already saved angle in list. 
-    Parametres
     -----------
     theta
         One angle to compare
