@@ -31,7 +31,7 @@ def game():
         val = 0
 
         for i in range(3):
-            window.config(bg='green')
+            score.config(bg='green')
             score.config(text='Score: ')
             dart.wait()
             val += dart.get_score()

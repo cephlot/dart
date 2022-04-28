@@ -109,7 +109,7 @@ class RegionSegmenter:
             return
 
         # Dilate and erode the color mask to get rid of unwanted garbage
-        kernel = np.ones((25, 25), np.uint8)
+        kernel = np.ones((55, 55), np.uint8)
         image = cv.dilate(self.color_mask, kernel)
         image = cv.erode(image, kernel) 
 
