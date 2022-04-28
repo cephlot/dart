@@ -49,10 +49,7 @@ class RegionSegmenter:
         OBS: set closest_score to score region nearest camera
         '''
         self.crop_board()
-        # cv.imwrite("foreground", self.foreground)
         self.multiplier_mask()
-        cv.imshow("multMask.png", self.color_mask)
-        cv.waitKey(0)
         self.scoring_region()
         self.get_mask_1x()
         self.get_mask_2x()
