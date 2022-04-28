@@ -46,7 +46,12 @@ class RegionSegmenter:
 
     def segment(self, closest_score):   
         '''
-        OBS: set closest_score to score region nearest camera
+        Generates all scoring segments of the dart board.
+        Parametres
+        -----------
+        closest_score
+            The score region closest to the camera. If not correct all
+            score regions will be offset
         '''
         self.crop_board()
         self.multiplier_mask()
