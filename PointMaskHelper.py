@@ -27,6 +27,9 @@ def generate_point_mask(image, score_region, closest_score ):
     return filledImage
 
 def preprocess(image, score_region):
+    '''
+    Preprocesses the image to give better accuracy when using hughLines
+    '''
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     cann_img = cv2.Canny(image_gray,100,200)
     image_cropped = cv2.bitwise_and(cann_img, score_region, mask = None) 
@@ -35,14 +38,22 @@ def preprocess(image, score_region):
     image_cropped = cv2.erode(image_cropped, kernel) 
     return image_cropped
 
+
 def getLines(image_cropped):
+    '''
+    Gets alls the lines returned by HughLines on the cropped image.
+    '''
     lines = cv2.HoughLines(image_cropped, 1, np.pi/180, 120, np.array([]))
     h,w = image_cropped.shape[:2]
     lineImage = np.zeros((h,w,1), dtype = "uint8")
     return lineImage, lines
- 
+
 
 def draw_lines(lineImage, lines):
+    '''
+    Draws the lines on lineImage using the coordinates in 
+    lines.
+    '''
     angle_list = []
     i = 0
     range = 10
