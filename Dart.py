@@ -1,5 +1,5 @@
 from ImageNormalizer import ImageNormalizer
-import RegionSegmenter
+from RegionSegmenter import RegionSegmenter
 import MotionDetector
 from collections import Counter
 
@@ -23,21 +23,26 @@ class Dart:
 =======
     def wait(self):
         frames_before, frames_after = self.detector.wait_for_motion()
+        self.frames_before = frames_before
+        self.frames_after = frames_after
 
         if self.segmenter == None:
-            self.segmenter = []
+            self.segmenter = [None] * len(frames_before)
 
             for i, frame in enumerate(frames_before):
-                self.segmenter.append(RegionSegmenter(ImageNormalizer.normalize_image(frame)))
+                self.segmenter[i] = RegionSegmenter(ImageNormalizer.normalize_image(frame))
 
     def get_score(self):
+<<<<<<< HEAD
 >>>>>>> 18568e1a07540966a09c228fcf661b9cce6a15e2
         frames_before, frames_after = self.detector.wait_for_motion()
+=======
+>>>>>>> 5e57d4202862996021c825e9530c2aafcd04701c
         scores = Counter()
         regions = [11]
 
-        for i, frame in enumerate(frames_before):
-            evaluator = ScoreEvaluator(frame, frames_after[i], regions[i], self.segmenter[i])
+        for i, frame in enumerate(self.frames_before):
+            evaluator = ScoreEvaluator(frame, self.frames_after[i], regions[i], self.segmenter[i])
             scores[i] = evaluator.evaluate()
 
         #value, _ = scores.most_common()

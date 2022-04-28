@@ -46,12 +46,7 @@ class RegionSegmenter:
 
     def segment(self, closest_score):   
         '''
-        Generates all scoring segments of the dart board.
-        Parametres
-        -----------
-        closest_score
-            The score region closest to the camera. If not correct all
-            score regions will be offset
+        OBS: set closest_score to score region nearest camera
         '''
         self.crop_board()
         self.multiplier_mask()
@@ -114,7 +109,7 @@ class RegionSegmenter:
             return
 
         # Dilate and erode the color mask to get rid of unwanted garbage
-        kernel = np.ones((25, 25), np.uint8)
+        kernel = np.ones((55, 55), np.uint8)
         image = cv.dilate(self.color_mask, kernel)
         image = cv.erode(image, kernel) 
 
