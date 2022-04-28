@@ -13,6 +13,10 @@ class Dart:
         self.detector = MotionDetector.MotionDetector()
 
     def start_round(self):
+        '''
+        Simulates one dart throw. Waits for motion and recieves score for each camera.
+        Returns the predicted score with most votes from each camera.
+        '''
         frames_before, frames_after = self.detector.wait_for_motion()
         scores = Counter()
         regions = [6, 11]
