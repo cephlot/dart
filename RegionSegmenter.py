@@ -67,6 +67,13 @@ class RegionSegmenter:
         # Create a greyscale of the board and use otsu to extract the foreground
         grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
         ret, thresholded = cv.threshold(grayscale, 0, 255, cv.THRESH_OTSU)
+
+        if (thresholded is None):
+            print("crop_board: The thresholded image was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.foreground = np.zeros(shape, np.uint8)
+            return
+
         thresholded = cv.bitwise_not(thresholded)
 
         # Create a bounding rectangle containing only the foreground
@@ -78,6 +85,13 @@ class RegionSegmenter:
         self.foreground = foreground
 
     def multiplier_mask(self):
+
+        if (self.foreground is None):
+            print("multiplier_mask: The foreground was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.color_mask = np.zeros(shape, np.uint8)
+            return
+
         # Make a 3-channel greyscale version of the image
         grayscale = cv.cvtColor(self.foreground, cv.COLOR_BGR2GRAY)
         grayscale = cv.cvtColor(grayscale, cv.COLOR_GRAY2RGB)
@@ -93,8 +107,14 @@ class RegionSegmenter:
 
     def scoring_region(self):
 
+        if (self.color_mask is None):
+            print("scoring_region: The color mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_scoring_area = np.zeros(shape, np.uint8)
+            return
+
         # Dilate and erode the color mask to get rid of unwanted garbage
-        kernel = np.ones((15, 15), np.uint8)
+        kernel = np.ones((25, 25), np.uint8)
         image = cv.dilate(self.color_mask, kernel)
         image = cv.erode(image, kernel) 
 
@@ -102,12 +122,25 @@ class RegionSegmenter:
         contours, hierarchy = cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
+        if (not cnts):
+            print("scoring_region: no contours were found")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_scoring_area = np.zeros(shape, np.uint8)
+            return
+
+
         area = np.zeros(image.shape, np.uint8)
         cv.fillPoly(area, pts=[cnts[0]], color=255)
 
         self.mask_scoring_area = area
 
     def get_mask_1x(self):
+
+        if (self.mask_scoring_area is None):
+            print("get_mask_1x: The scoring area mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_1x = np.zeros(shape, np.uint8)
+            return
 
         image = cv.subtract(self.mask_scoring_area, self.color_mask)
 
@@ -120,9 +153,21 @@ class RegionSegmenter:
 
     def get_mask_2x(self):
 
+        if (self.mask_1x is None):
+            print("get_mask_2x: The 1x multiplier mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_2x = np.zeros(shape, np.uint8)
+            return
+
         # Find the largest contour in the 1x score mask
         contours, hierarchy = cv.findContours(self.mask_1x, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
+
+        if (not cnts):
+            print("get_mask_2x: no contours were found")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_2x = np.zeros(shape, np.uint8)
+            return
 
         # Fill the contour
         image = np.zeros(self.mask_1x.shape, np.uint8)
@@ -134,6 +179,12 @@ class RegionSegmenter:
         self.mask_2x = result
 
     def get_mask_3x(self):
+
+        if (self.color_mask is None):
+            print("get_mask_3x: The color mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_3x = np.zeros(shape, np.uint8)
+            return
 
         color_mask = self.color_mask
         image = cv.subtract(color_mask, self.mask_2x)
@@ -151,6 +202,12 @@ class RegionSegmenter:
         contours, hierarchy = cv.findContours(image, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
 
+        if (not cnts):
+            print("get_mask_3x: no contours were found")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_3x = np.zeros(shape, np.uint8)
+            return
+
         blank = np.zeros(image.shape, np.uint8)
         cv.fillPoly(blank, pts =[cnts[0]], color=255)
 
@@ -167,6 +224,41 @@ class RegionSegmenter:
 
     def get_bullseye_masks(self):
         
+        if (self.mask_scoring_area is None):
+            print("get_bullseye_masks: The scoring area mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
+
+        if (self.color_mask is None):
+            print("get_bullseye_masks: The color mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
+
+        if (self.mask_1x is None):
+            print("get_bullseye_masks: The 1x mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
+
+        if (self.mask_2x is None):
+            print("get_bullseye_masks: The 2x mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
+
+        if (self.mask_3x is None):
+            print("get_bullseye_masks: The 3x mask was empty")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
+
         # Subtract the different multipliers from the scoring region
         bullseye = cv.subtract(self.mask_scoring_area, self.mask_1x)
         bullseye = cv.subtract(bullseye, self.mask_2x)
@@ -177,6 +269,13 @@ class RegionSegmenter:
 
         contours, hierarchy = cv.findContours(bullseye, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         cnts = sorted(contours, key=cv.contourArea, reverse=True)[:2]
+
+        if (not cnts):
+            print("get_bullseye_masks: no contours were found")
+            shape = (self.image.shape[0], self.image.shape[1])
+            self.mask_inner_bullseye = np.zeros(shape, np.uint8)
+            self.mask_outer_bullseye = np.zeros(shape, np.uint8)
+            return
 
         inner_bullseye = np.zeros(bullseye.shape, np.uint8)
         cv.fillPoly(inner_bullseye, pts =[cnts[1]], color=255)

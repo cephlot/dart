@@ -18,15 +18,18 @@ def start_game():
 
 def game():
     '''
-    Runs a game of dart. Three throws per player, displays score for each throw.
+    Simulates a game of dart. Three throws per player.
+    Displays the score after each throw.
+    Uses Dart.py to simulate the game.
     '''
-    dart = Dart()
+    # Put dart logic here!
     score = Label(window, font=('Courier',44), bg='white')
     score.config(anchor=CENTER)
     score.config(text='Welcome to dart!', bg='white')
     score.pack(fill=BOTH, expand=1)
 
-    time.sleep(5)
+    dart = Dart()
+
     for i in range(2):
         score.config(text=f'Player {i+1}')
         time.sleep(3)
@@ -35,7 +38,8 @@ def game():
         for i in range(3):
             window.config(bg='green')
             score.config(text='Score: ')
-            val += dart.start_round()
+            dart.wait()
+            val += dart.get_score()
             score.config(text=f'Score: {val}')
             window.config(bg='white')
             time.sleep(5)

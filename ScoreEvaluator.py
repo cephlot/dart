@@ -14,10 +14,10 @@ class ScoreEvaluator:
         the image of an dart board with dart
     NOTE: work in progress these attributes are temporary
     ''' 
-    def __init__(self, image_B, image_I, region):
+    def __init__(self, image_B, image_I, region, segmenter):
         self.image_B = image_B
         self.image_I = image_I
-        self.segmenter = RegionSegmenter(self.image_B)
+        self.segmenter = segmenter
         self.segmenter.segment(region)
 
     def evaluate(self):
