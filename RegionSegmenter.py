@@ -192,3 +192,54 @@ class RegionSegmenter:
         point regions to be assigned correctly!
         '''
         self.mask_points = generate_point_mask(self.foreground, self.mask_scoring_area, closest_score)
+
+    def image_stats(image):
+        '''
+        Computes the mean and standard deviation of each color channel
+        '''
+        (l, a, b) = cv.split(image)
+        (lMean, lStd) = (l.mean(), l.std())
+        (aMean, aStd) = (a.mean(), a.std())
+        (bMean, bStd) = (b.mean(), b.std())
+        # return the color statistics
+        return (lMean, lStd, aMean, aStd, bMean, bStd)
+
+    def color_transfer(source, target):
+        '''
+        Convert the image from a RGB to a LAB color space to make transfer simplier,
+        Takes the source image as a "color reference" for the target, generating a modified
+        image with matching colors
+
+        This code is backup in case auto white balancing does not work.
+        '''
+        source = cv.cvtColor(source, cv.COLOR_BGR2LAB).astype("float32")
+        target = cv.cvtColor(target, cv.COLOR_BGR2LAB).astype("float32")
+        # compute color statistics for the source and target images
+        (lMeanSrc, lStdSrc, aMeanSrc, aStdSrc, bMeanSrc, bStdSrc) = image_stats(source)
+        (lMeanTar, lStdTar, aMeanTar, aStdTar, bMeanTar, bStdTar) = image_stats(target)
+        # subtract the means from the target image
+        (l, a, b) = cv.split(target)
+        l -= lMeanTar
+        a -= aMeanTar
+        b -= bMeanTar
+        # scale by the standard deviations
+        l = (lStdTar / lStdSrc) * l
+        a = (aStdTar / aStdSrc) * a
+        b = (bStdTar / bStdSrc) * b
+        # add in the source mean
+        l += lMeanSrc
+        a += aMeanSrc
+        b += bMeanSrc
+        # clip the pixel intensities to [0, 255] if they fall outside
+        # this range
+        l = np.clip(l, 0, 255)
+        a = np.clip(a, 0, 255)
+        b = np.clip(b, 0, 255)
+        # merge the channels together and convert back to the RGB color
+        # space, being sure to utilize the 8-bit unsigned integer data
+        # type
+        transfer = cv.merge([l, a, b])
+        transfer = cv.cvtColor(transfer.astype("uint8"), cv.COLOR_LAB2BGR)
+        
+        # return the color transferred image
+        return transfer
