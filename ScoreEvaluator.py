@@ -22,8 +22,10 @@ class ScoreEvaluator:
         self.segmenter = RegionSegmenter(self.image_B)
         self.segmenter.segment(region)
 
-    # Uses the RegionSegmenter and dart localizer thingy to score
     def evaluate(self):
+        '''
+        Uses the RegionSegmenter and dart localizer thingy to score
+        '''
         x, y = DartLocalization.find_dart_point(self.image_B, self.image_I)
         if x < 0 and y < 0:
             print(f'No dart ({x},{y})')
