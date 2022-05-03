@@ -6,11 +6,11 @@ name: score-ci
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main, dev ]
+    branches: [ main, dev, feat_score_api ]
     paths:
       - score/**
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main, dev, feat_score_api ]
     paths:
       - score/**
 

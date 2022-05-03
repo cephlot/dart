@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 	extended: true 
  }));
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.render('index', { 
 		p1_score: obj['1'],
 		p2_score: obj['2']
@@ -39,7 +39,7 @@ app.post('/', (req, res) => {
 		p2_score: obj['2']
 	 })})
 
-app.delete('/', (req, res) => {
+app.delete('/', (_req, res) => {
 	obj = {1: 0, 2: 0};
 
 	res.render('index', { 
