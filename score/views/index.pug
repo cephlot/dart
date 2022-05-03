@@ -29,8 +29,8 @@ html
       });
 
       socket.on('data', function(data) {
-        p1_score = data['p1_score'];
-        p2_score = data['p2_score'];
+        document.getElementById(1).getElementsByTagName('div')[0].innerHTML = data['p1_score'];
+        document.getElementById(2).getElementsByTagName('div')[0].innerHTML = data['p2_score'];
       });
   .score-board
     #1.player
