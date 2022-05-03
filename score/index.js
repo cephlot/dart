@@ -2,41 +2,51 @@ const express = require('express')
 const app = express()
 const port = 3000
 const path = require('path');
+var bodyParser = require('body-parser');
+
 
 let fs = require('fs');
-let obj = [{1: 'one'}, {2: 'two'}, {3: 'three'}]
+let obj = {"1": "0", "2": "0"}
 
 app.set('view engine', 'pug')
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ 
+	extended: true 
+ }));
 
 app.get('/', (req, res) => {
     res.render('index', { 
-		p1_score: 323,
-		p2_score: 131
+		p1_score: obj['1'],
+		p2_score: obj['2']
 	 })
 })
 
 app.put('/', (req, res) => {
-    obj.push(req)
+    obj = req.body
 
-    let result = '<table>';
-    for (let el in obj) {
-        result += "<tr><td>" + el + "</td><td>" + el[0] + "</td></tr>";
-      }
-      result += '</table>';
-
-    res.send(result)
+	  res.render('index', { 
+		p1_score: obj['1'],
+		p2_score: obj['2']
+	 })
 })
 
 app.post('/', (req, res) => {
-    obj.push(req)
+    obj = req.body
 
-    res.send(document.getElementById(req.id).getElementsByTagName('div')[0] = 'hej');
-})
+	console.log(req.body)
+
+	res.render('index', { 
+		p1_score: obj['1'],
+		p2_score: obj['2']
+	 })})
 
 app.delete('/', (req, res) => {
-    res.send('Got: DELETE')
-})
+	obj = {1: 0, 2: 0};
+
+	res.render('index', { 
+		p1_score: obj['1'],
+		p2_score: obj['2']
+	 })})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
