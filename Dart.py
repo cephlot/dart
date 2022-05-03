@@ -14,13 +14,6 @@ class Dart:
         self.detector = MotionDetector.MotionDetector()
         self.segmenter = None
 
-<<<<<<< HEAD
-    def start_round(self):
-        '''
-        Simulates one dart throw. Waits for motion and recieves score for each camera.
-        Returns the predicted score with most votes from each camera.
-        '''
-=======
     def wait(self):
         frames_before, frames_after = self.detector.wait_for_motion()
         self.frames_before = frames_before
@@ -33,11 +26,6 @@ class Dart:
                 self.segmenter[i] = RegionSegmenter(ImageNormalizer.normalize_image(frame))
 
     def get_score(self):
-<<<<<<< HEAD
->>>>>>> 18568e1a07540966a09c228fcf661b9cce6a15e2
-        frames_before, frames_after = self.detector.wait_for_motion()
-=======
->>>>>>> 5e57d4202862996021c825e9530c2aafcd04701c
         scores = Counter()
         regions = [11]
 
