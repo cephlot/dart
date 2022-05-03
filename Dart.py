@@ -26,14 +26,25 @@ class Dart:
                 self.segmenter[i] = RegionSegmenter(ImageNormalizer.normalize_image(frame))
 
     def get_score(self):
-        scores = Counter()
+        scores = []
         regions = [11]
 
         for i, frame in enumerate(self.frames_before):
             evaluator = ScoreEvaluator(frame, self.frames_after[i], regions[i], self.segmenter[i])
-            scores[i] = evaluator.evaluate()
+            scores.append(evaluator.evaluate())
 
-        #value, _ = scores.most_common()
-        value = scores[0]
+        return Dart.vote(scores)
 
-        return value
+    def vote(scores):
+        '''
+        returns most common value or the max value if all values occur the same amount of times.
+        '''
+        most_freq = Dart.most_frequent(scores)
+        if (scores.count(most_freq) == 2):
+            return most_freq
+        return max(scores)
+    def most_frequent(List):
+        '''
+        Returns the most frequent element
+        '''
+        return max(set(List), key = List.count)
