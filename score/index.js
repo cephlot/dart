@@ -6,7 +6,7 @@ const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
 
-let obj = {"p1_score": 0, "p2_score": 0}
+let obj = {p1_score: 0, p2_score: 1}
 var clients = [];
 
 io.listen(server);
@@ -29,42 +29,28 @@ setInterval(function() {
 }, 1000);
 
 app.get('/', (_req, res) => {
-    res.render('index', {
-		getScore: function(str) {
-			return obj[str];
-		}
-	})
+    res.render('index', obj)
 })
 
 app.put('/', (req, res) => {
     obj = req.body
 
-	res.render('index', {
-		getScore: function(str) {
-			return obj[str];
-		}
-	})})
+	res.render('index', obj)
+})
 
 app.post('/', (req, res) => {
     obj = req.body
 
 	console.log(req.body)
 
-	res.render('index', {
-		getScore: function(str) {
-			return obj[str];
-		}
-	})
+	res.render('index', obj)
 })
 
 app.delete('/', (_req, res) => {
-	obj = {"p1_score": 0, "p2_score": 0}
+	obj = {1: 0, 2: 0};
 
-	res.render('index', {
-		getScore: function(str) {
-			return obj[str];
-		}
-	})})
+	res.render('index', obj)
+})
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
