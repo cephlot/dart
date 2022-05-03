@@ -9,8 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ajax": "^0.0.4",
     "express": "^4.18.1",
+    "http": "^0.0.1-security",
     "jade": "^1.11.0",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "socket.io": "^4.5.0"
   }
 }

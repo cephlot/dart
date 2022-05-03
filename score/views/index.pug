@@ -1,27 +1,43 @@
 doctype html
-style.
-  .score-board {
-  text-align: center;
-  padding: 25px;
-  }
-  .player {
-  display: inline-block;
-  padding: 15px;
-  }
-  .player h4 {
-  font-weight: bold;
-  }
-  .score-box {
-  border: 3px solid black;
-  padding: 30px;
-  color: #2CB3C9;
-  }
-.score-board
-  #1.player
-    h4 Player 1
-    .score-box
-      | #{p1_score}
-  #2.player
-    h4 Player 2
-    .score-box
-      | #{p2_score}
+html
+  head
+    title Scoreboard
+  style.
+    .score-board {
+    text-align: center;
+    padding: 25px;
+    }
+    .player {
+    display: inline-block;
+    padding: 15px;
+    }
+    .player h4 {
+    font-weight: bold;
+    }
+    .score-box {
+    border: 3px solid black;
+    padding: 30px;
+    color: #2CB3C9;
+    }
+  body
+    script(src="/socket.io/socket.io.js")
+    script.
+      var socket = io();
+
+      socket.on('connect', function() {
+        console.log("connected");
+      });
+
+      socket.on('data', function(data) {
+        document.getElementById("p1_score").innerHTML = data['p1_score'];
+        document.getElementById("p2_score").innerHTML = data['p2_score'];
+      });
+  .score-board
+    #1.player
+      h4 Player 1
+      .score-box
+        div(class='.score-box', id="p1_score") #{getScore("p1_score")}
+    #2.player
+      h4 Player 2
+      .score-box
+        div(class='.score-box' id="p2_score") #{getScore("p2_score")}
