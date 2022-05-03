@@ -19,11 +19,39 @@ class ImageNormalizer:
 
         kernelBIG = np.ones((6,6)) 
         res = cv2.dilate(res, kernelBIG)
-        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, (20, 20))
+        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, kernelBIG)
         kernelSMALL = np.ones((3,3))
         res = cv2.erode(res, kernelSMALL)
+        res = cv2.morphologyEx(res, cv2.MORPH_OPEN, kernelSMALL)
 
         return res
+
+    @staticmethod
+    def red_color_mask(img):
+        #convert the BGR image to HSV colour space
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        #set the lower and upper bounds for the green hue
+        lower_red = np.array([1, 100, 100])
+        upper_red = np.array([5, 255, 255])
+
+        #create a mask for green colour using inRange function
+        mask = cv2.inRange(hsv, lower_red, upper_red)
+
+        #perform bitwise and on the original image arrays using the mask
+        res = cv2.bitwise_and(img, img, mask=mask)
+
+        kernelBIG = np.ones((8,8)) 
+        res = cv2.dilate(res, kernelBIG)
+        res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, kernelBIG)
+        kernelSMALL = np.ones((3,3))
+        res = cv2.erode(res, kernelSMALL)
+        res = cv2.morphologyEx(res, cv2.MORPH_OPEN, kernelSMALL)
+
+        cv2.imshow('RED', res)
+
+        return res
+
 
     @staticmethod
     def image_colorfulness(image, sigma):
@@ -40,13 +68,23 @@ class ImageNormalizer:
         return ImageNormalizer.normalize_brightness(white_balance_corrected)
 
     @staticmethod
-    def normalize_image_spec_green(img):
+    def normalize_image_spec_green(img, sigma):
         white_balance_corrected = ImageNormalizer.white_balance(img)
         normal_brightness = ImageNormalizer.normalize_brightness(white_balance_corrected)
         img_green = ImageNormalizer.green_color_mask(white_balance_corrected)
-        img_green = ImageNormalizer.image_colorfulness(img_green, 1.5)
+        img_green = ImageNormalizer.image_colorfulness(img_green, sigma)
         
         ret = cv2.add(img_green, normal_brightness)
+        return ret
+    
+    @staticmethod
+    def normalize_image_spec_red(img, sigma ):
+        white_balance_corrected = ImageNormalizer.white_balance(img)
+        normal_brightness = ImageNormalizer.normalize_brightness(white_balance_corrected)
+        img_red = ImageNormalizer.red_color_mask(white_balance_corrected)
+        img_red = ImageNormalizer.image_colorfulness(img_red, sigma)
+        
+        ret = cv2.add(img_red, normal_brightness)
         return ret
 
 
