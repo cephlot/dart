@@ -6,7 +6,7 @@ const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
 
-let obj = {p1_score: 0, p2_score: 1}
+let obj = {p1_score: 0, p2_score: 0}
 var clients = [];
 
 io.listen(server);
