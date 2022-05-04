@@ -47,7 +47,7 @@ app.post('/', (req, res) => {
 })
 
 app.delete('/', (_req, res) => {
-	obj = {1: 0, 2: 0};
+	obj = {"p1_score": "0", "p2_score": "0"};
 
 	res.render('index', obj)
 })
