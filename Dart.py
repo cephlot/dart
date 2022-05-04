@@ -17,7 +17,9 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
         self.projector = None
-        self.reference = cv.imread('C:\dart\images\pic_nice.jpg', cv.IMREAD_GRAYSCALE)
+        self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
+        #cv.imshow("pic nice", self.reference)
+        #cv.waitKey(0)
 
     def wait(self):
         frames_before, frames_after = self.detector.wait_for_motion()
@@ -37,6 +39,7 @@ class Dart:
             evaluator = ScoreEvaluator(frame, self.frames_after[i], self.projector[i])
             scores.append(evaluator.evaluate())
 
+        cv.waitKey(0)
         return Dart.vote(scores)
 
     def vote(scores):

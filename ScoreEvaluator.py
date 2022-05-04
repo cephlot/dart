@@ -39,10 +39,12 @@ class ScoreEvaluator:
 
         hit_loc = self.projector.project_dart_coordinate((x, y))
 
-        test = cv.circle(self.projector.img_ref, hit_loc, 20, (250, 0, 0), 4)
+        test = cv.circle(self.projector.img_ref, hit_loc, 10, (250, 0, 0), 4)
         cv.imshow("yes", test)
-        cv.waitKey(0)
-'''
+
+        return 0
+
+        '''
         if self.segmenter.mask_inner_bullseye[y][x]:
             print('bulleye!')
             return 50
@@ -61,8 +63,7 @@ class ScoreEvaluator:
         else:
             print('outside')
             return 0
-'''
+        '''
+        #print(f'Region: {self.segmenter.mask_points[y][x]}')
 
-        print(f'Region: {self.segmenter.mask_points[y][x]}')
-
-        return self.segmenter.mask_points[y][x]*multiplier
+        #return self.segmenter.mask_points[y][x]*multiplier

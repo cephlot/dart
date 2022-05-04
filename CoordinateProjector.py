@@ -15,6 +15,8 @@ class CoordinateProjector:
     
     def __init__(self, image_reference):
         self.img_ref = image_reference
+        if (image_reference is None):
+            print("AAAAAAAAAAAAAAAAAAAAAA")
         self.matrix = None
         self.MIN_MATCH_COUNT = 10
 
@@ -62,7 +64,7 @@ class CoordinateProjector:
         in order to have a projection matrix for the projection.
         '''
         c = dart_coordinate
-        if(self.matrix == None):
+        if(self.matrix is None):
             print("ERROR in project_dart_coordinate, projection matrix is None")
             return (0,0)
         c = np.array([[c[0], c[1]]], dtype='float32')
