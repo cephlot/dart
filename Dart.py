@@ -40,7 +40,7 @@ class Dart:
         returns most common value or the max value if all values occur the same amount of times.
         '''
         most_freq = Dart.most_frequent(scores)
-        if (scores.count(most_freq) == 2):
+        if (scores.count(most_freq) > 1):
             return most_freq
         return max(scores)
     def most_frequent(List):
