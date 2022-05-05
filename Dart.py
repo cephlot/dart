@@ -1,9 +1,4 @@
-from ImageNormalizer import ImageNormalizer
-from RegionSegmenter import RegionSegmenter
-from CoordinateProjector import CoordinateProjector
-
 import MotionDetector
-from collections import Counter
 
 import cv2 as cv
 
@@ -17,7 +12,7 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
         self.projector = None
-        self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
+        # self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         #cv.imshow("pic nice", self.reference)
         #cv.waitKey(0)
 
@@ -26,21 +21,13 @@ class Dart:
         self.frames_before = frames_before
         self.frames_after = frames_after
 
-        if self.projector == None:
-            self.projector = [None] * len(frames_before)
-
-            for i, frame in enumerate(frames_before):
-                self.projector[i] = CoordinateProjector(self.reference)
-
     def get_score(self):
-        scores = []
-
-        for i, frame in enumerate(self.frames_before):
-            evaluator = ScoreEvaluator(frame, self.frames_after[i], self.projector[i])
-            scores.append(evaluator.evaluate())
-
+        '''
+        Gets the score from a dart by using evaluator
+        '''
+        evaluator = ScoreEvaluator(self.frames_before)
         cv.waitKey(0)
-        return Dart.vote(scores)
+        return evaluator.evaluate(self.frames_before, self.frames_after)
 
     def vote(scores):
         '''
