@@ -1,6 +1,9 @@
 
+from cv2 import imshow
 from DartLocalization import DartLocalization
 from RegionSegmenter import RegionSegmenter
+
+import cv2 as cv
 
 
 class ScoreEvaluator:
@@ -14,11 +17,13 @@ class ScoreEvaluator:
         the image of an dart board with dart
     NOTE: work in progress these attributes are temporary
     ''' 
-    def __init__(self, image_B, image_I, region, segmenter):
+    def __init__(self, image_B, image_I, projector):
         self.image_B = image_B
         self.image_I = image_I
-        self.segmenter = segmenter
-        self.segmenter.segment(region)
+        self.projector = projector
+
+        image_B_gray = cv.cvtColor(image_B, cv.COLOR_BGR2GRAY)
+        self.projector.generate_matrix(image_B_gray)
 
     def evaluate(self):
         '''
@@ -32,10 +37,14 @@ class ScoreEvaluator:
 
         print(f'x: {x}, y: {y}')
 
-        #x1, y1, w, h = self.segmenter.bbox
-        #x = x - x1
-        #y = y - y1
+        hit_loc = self.projector.project_dart_coordinate((x, y))
 
+        test = cv.circle(self.projector.img_ref, hit_loc, 10, (250, 0, 0), 4)
+        cv.imshow("yes", test)
+
+        return 0
+
+        '''
         if self.segmenter.mask_inner_bullseye[y][x]:
             print('bulleye!')
             return 50
@@ -54,7 +63,7 @@ class ScoreEvaluator:
         else:
             print('outside')
             return 0
+        '''
+        #print(f'Region: {self.segmenter.mask_points[y][x]}')
 
-        print(f'Region: {self.segmenter.mask_points[y][x]}')
-
-        return self.segmenter.mask_points[y][x]*multiplier
+        #return self.segmenter.mask_points[y][x]*multiplier

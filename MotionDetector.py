@@ -6,7 +6,7 @@ from datetime import datetime
 class MotionDetector:
     def __init__(self):
         if platform == "linux" or platform == "linux2":
-            self.camera_indices = [0,2]
+            self.camera_indices = [1, 3]
         elif platform == "darwin":
             self.camera_indices = [1,2]
         elif platform == "win32":
