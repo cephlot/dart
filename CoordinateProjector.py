@@ -16,7 +16,7 @@ class CoordinateProjector:
     def __init__(self, image_reference):
         self.img_ref = image_reference
         if (image_reference is None):
-            print("AAAAAAAAAAAAAAAAAAAAAA")
+            print("Reference image is None on init for CoordinateProjector.")
         self.matrix = None
         self.MIN_MATCH_COUNT = 10
 
@@ -30,6 +30,11 @@ class CoordinateProjector:
         a static reference image
         
         '''
+        if(img_cam is None):
+            print("No image in generate_matrix, img_cam is None")
+            return np.zeros((3,3))
+
+
         # Initiate SIFT detector
         sift = cv.SIFT_create(400)
         # find the keypoints and descriptors with SIFT
@@ -46,7 +51,7 @@ class CoordinateProjector:
             if m.distance < 0.7*n.distance:
                 good.append(m)
         matrix = None
-        print("good matches: " + str(len(good)))
+        print("SIFT good matches: " + str(len(good)))
         if len(good)>self.MIN_MATCH_COUNT:
             # good = good[:10]
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
@@ -54,6 +59,13 @@ class CoordinateProjector:
             matrix, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
         else:
             print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
+
+
+        img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
+        cv.imshow("original", img_cam)   
+        cv.waitKey(0)
+        cv.imshow("warped", img_warped)   
+        cv.waitKey(0)
         self.matrix = matrix
 
 
