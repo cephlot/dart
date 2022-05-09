@@ -34,7 +34,6 @@ class CoordinateProjector:
             print("No image in generate_matrix, img_cam is None")
             return np.zeros((3,3))
 
-
         # Initiate SIFT detector
         sift = cv.SIFT_create(400)
         # find the keypoints and descriptors with SIFT
