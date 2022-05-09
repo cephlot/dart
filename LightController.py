@@ -5,33 +5,50 @@ class LightController:
     def __init__(self):
         self.ser = Serial(port='COM5', baudrate=115200)
         time.sleep(2)
-        self.pixels_clear()
+        self.clear()
 
     def __del__(self):
-        self.pixels_clear()
+        self.clear()
         self.ser.close()
 
-    def pixels_red(self):
+    def red(self):
         self.ser.write(b'r')
 
-    def pixels_green(self):
+    def green(self):
         self.ser.write(b'g')
 
-    def pixels_blue(self):
+    def blue(self):
         self.ser.write(b'b')
 
-    def pixels_white(self):
+    def white(self):
         self.ser.write(b'w')
 
-    def pixels_clear(self):
+    def clear(self):
         self.ser.write(b'c')
+
+    def rainbow(self):
+        self.ser.write(b'R')
+
+    def flash(self):
+        self.ser.write(b'f')
+
+    def loading(self):
+        self.ser.write(b'l')
 
 light_controller = LightController()
 
-while True:
-    light_controller.pixels_red()
-    time.sleep(1)
-    light_controller.pixels_green()
-    time.sleep(1)
-    light_controller.pixels_blue()
-    time.sleep(1)
+# while True:
+light_controller.red()
+time.sleep(2)
+light_controller.green()
+time.sleep(2)
+light_controller.blue()
+time.sleep(2)
+light_controller.white()
+time.sleep(2)
+light_controller.rainbow()
+time.sleep(5)
+light_controller.flash()
+time.sleep(5)
+light_controller.loading()
+time.sleep(5)
