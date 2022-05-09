@@ -70,7 +70,7 @@ class Dart:
             frames_before, frames_after = self.detector.wait_for_motion()
 
             # analyse image
-            condition = ImageAnalyzer.analyze(self.frames_before, frames_before)
+            condition = ImageAnalyzer.analyze(self.frames_before, frames_after)
 
         # Set new background
         self.frames_before = frames_after

@@ -1,5 +1,4 @@
 import cv2 as cv
-from cv2 import imshow
 import numpy as np
 
 class ImageAnalyzer:
@@ -24,9 +23,8 @@ class ImageAnalyzer:
             thresh_frame = cv.threshold(src=diff_frame, thresh=0, maxval=255, type=cv.THRESH_BINARY)[1]
             thresh_frame = cv.erode(src=thresh_frame, kernel=np.ones((6,6)))
 
-            contours, hierarchy = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            contours, _ = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
             
             if len(contours) == 1:
                 return True
-            print(len(contours))
         return False
