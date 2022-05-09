@@ -3,6 +3,7 @@ import cv2 as cv
 from sys import platform
 from datetime import datetime
 
+
 class cameraSetup:
     @staticmethod
     def testDevice(source):
@@ -17,15 +18,14 @@ class cameraSetup:
         return 0
 
     @staticmethod
-    def getCams(excption):
+    def getCams(exception):
         valid_cams = []
         for i in range(8):
-            if i is not excption:
-                if cameraSetup.testDevice(i) is 0:
+            if i is not exception:
+                if cameraSetup.testDevice(i) == 0:
                     valid_cams.append(i)
-        
         return valid_cams
-        
+
     @staticmethod
     def checkOS():
         if platform == "linux" or platform == "linux2":
@@ -36,3 +36,9 @@ class cameraSetup:
             return 0
         else:
             raise RuntimeError("Unknown operating system")
+
+    @staticmethod
+    def stabilize(camera_indices, caps):
+        for cameras in range(len(camera_indices)):
+            for i in range(50):
+                ret, frame = caps[cameras].read()
