@@ -114,12 +114,14 @@ class ScoreEvaluator:
             return proj
         average = self.average_coordinates(proj)
         avarage_distance = 0
-        for c in proj_coordinate_list:
+        for c in proj:
             avarage_distance += self.distance(average, c)
+        avarage_distance = avarage_distance / len(proj)
         for i, c in enumerate(proj):
             distanceFromAvarage = self.distance(average, proj[0])
             if(distanceFromAvarage > avarage_distance*1.2 and distanceFromAvarage > 30):
-                del proj[i]
+                print("removing")
+                proj.remove(c)
         return proj
 
     def average_coordinates(self, coordinates):
