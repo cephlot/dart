@@ -15,7 +15,6 @@ caps = [None] * len(camera_indices)
 for i in range(len(caps)):
     caps[i] = cv2.VideoCapture(camera_indices[i])
 
-
 cs.stabilize(camera_indices, caps)
 
 while True:
@@ -27,11 +26,6 @@ while True:
     k = cv2.waitKey(1)
     if k == ord('q') or k == 27:
         break
-
-# for cameras in range(len(camera_indices)):
-#     ret, frame = caps[cameras].read()
-#         # Display the resulting frame
-#     cv2.imwrite('Camera'+str(cameras)+'.png', frame)
 
 # When everything done, release the capture
 for cap in caps:
