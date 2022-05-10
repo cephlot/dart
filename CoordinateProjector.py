@@ -50,7 +50,7 @@ class CoordinateProjector:
             if m.distance < 0.7*n.distance:
                 good.append(m)
         matrix = None
-        # print("SIFT good matches: " + str(len(good)))
+        print("SIFT good matches: " + str(len(good)))
         if len(good)>self.MIN_MATCH_COUNT:
             # good = good[:10]
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
@@ -61,10 +61,10 @@ class CoordinateProjector:
 
 
         img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
-        #cv.imshow("original", img_cam)   
-        #cv.waitKey(0)
-        #cv.imshow("warped", img_warped)   
-        #cv.waitKey(0)
+        cv.imshow("original", img_cam)   
+        cv.waitKey(0)
+        cv.imshow("warped", img_warped)   
+        cv.waitKey(0)
         self.matrix = matrix
 
 

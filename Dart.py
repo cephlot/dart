@@ -26,6 +26,8 @@ class Dart:
         '''
         Gets the score from a dart by using evaluator
         '''
+        print("BEFORE")
+        print(len(self.frames_before))
         evaluator = ScoreEvaluator(self.frames_before)
         return evaluator.evaluate(self.frames_before, self.frames_after)
 

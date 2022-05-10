@@ -21,6 +21,8 @@ class ScoreEvaluator:
         self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         self.board_mask = cv.imread('images/board_mask.png', cv.IMREAD_GRAYSCALE)
         self.projectors = self.create_projectors(image_B_frames)
+        self.DISTANCE_FACTOR = 1.1
+        self.PIXEL_FACTOR = 10
 
 
     def evaluate(self, image_B_frames, image_I_frames):
@@ -127,7 +129,7 @@ class ScoreEvaluator:
             Distance from average coordinate is at least 5 pixels
             Coordinate is furthest away
         '''
-        proj = proj_coordinate_list
+        proj = self.check_negative_projection(proj_coordinate_list)
         if(len(proj) != 3):
             return proj
         average = self.average_coordinates(proj)
@@ -138,7 +140,7 @@ class ScoreEvaluator:
         worst_c = None
         for _, c in enumerate(proj):
             distanceFromAvarage = self.distance(average, c)
-            if(distanceFromAvarage > avarage_distance*1.5 and distanceFromAvarage > 10):
+            if(distanceFromAvarage > avarage_distance*1.1 and distanceFromAvarage > self.PIXEL_FACTOR):
                 if(worst_c is None):
                     worst_c = (c, distanceFromAvarage)
                 elif(distanceFromAvarage > worst_c[1]):
@@ -147,6 +149,14 @@ class ScoreEvaluator:
             print(f'quality_control_projected_coordinates: one bad dart cordinate, removing ({worst_c[0][1]},{worst_c[0][0]})')
             proj.remove(worst_c[0])
         return proj
+    
+    def check_negative_projection(self,coordinates):
+        for c in coordinates:
+            if(c[0] < 0 or c[1] < 0):
+                coordinates.remove(c)
+            if(c[0] > self.reference.shape[0] or c[1] > self.reference.shape[1]):
+                coordinates.remove(c)
+        return coordinates
 
     def average_coordinates(self, coordinates):
         c = [sum(x)/len(x) for x in zip(*coordinates)]
@@ -156,4 +166,3 @@ class ScoreEvaluator:
         x1, y1 = c1
         x2, y2 = c2
         return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
-
