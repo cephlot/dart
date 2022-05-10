@@ -2,21 +2,26 @@
 
 #define PIN 6
 
-#define USE_PROTOTYPE
+// Uncomment to use small pixel ring for prototyping
+//#define USE_PROTOTYPE
 #ifdef USE_PROTOTYPE
-#define NUM_PIXELS 16
+#define TOTAL_PIXELS 16 /* Total number of connected pixels */
+#define NUM_PIXELS 16 /* Number of used pixels */
+#define FIRST_PIXEL 0 /* First used pixel */
 #define COLOR_MODE NEO_GRB
 #else
-#define NUM_PIXELS 50
+#define TOTAL_PIXELS 50 /* Total number of connected pixels */
+#define NUM_PIXELS 25 /* Number of used pixels */
+#define FIRST_PIXEL 4 /* First used pixel */
 #define COLOR_MODE NEO_BRG
 #endif
 
-Adafruit_NeoPixel pixels(NUM_PIXELS, PIN, COLOR_MODE + NEO_KHZ800);
+Adafruit_NeoPixel pixels(TOTAL_PIXELS, PIN, COLOR_MODE + NEO_KHZ800);
 
+// The available effects
 enum effect {clear, red, green, blue, white, rainbow, flash, loading};
 effect current_effect;
-
-unsigned long effect_change;
+unsigned long effect_change; // The last time the effect was changed
 
 void setup() {
   Serial.begin(115200);
@@ -110,16 +115,16 @@ void update_effect() {
 
 void set_all_pixels(uint32_t color) {
   for (int i = 0; i < NUM_PIXELS; i++) {
-    pixels.setPixelColor(i, color);
+    pixels.setPixelColor(FIRST_PIXEL + i, color);
   }
 }
 
 void update_rainbow(unsigned long since_effect_change) {
   uint16_t phase = since_effect_change * NUM_PIXELS * 3 % 65536;
-  pixels.setBrightness(32);
+  pixels.setBrightness(255);
   for (uint32_t i = 0; i < NUM_PIXELS; i++) {
     uint16_t hue = ((i * 65536 / NUM_PIXELS) - phase) % 65536;
-    pixels.setPixelColor(i, pixels.ColorHSV(hue));
+    pixels.setPixelColor(FIRST_PIXEL + i, pixels.ColorHSV(hue));
   }
 }
 
@@ -131,12 +136,13 @@ void update_flash(unsigned long since_effect_change) {
 }
 
 void update_loading(unsigned long since_effect_change) {
-  uint16_t phase = since_effect_change * 50 % 65536;
+  const int speed = 10;
+  uint16_t phase = since_effect_change * speed % 65536;
   uint16_t first_led = (uint32_t)phase * NUM_PIXELS / 65535;
   const uint16_t length = NUM_PIXELS / 4;
-  pixels.setBrightness(32);
+  pixels.setBrightness(255);
   pixels.clear();
   for (uint16_t i = first_led; i < first_led + length; i++) {
-    pixels.setPixelColor(i % NUM_PIXELS, pixels.Color(255, 255, 0));
+    pixels.setPixelColor(FIRST_PIXEL + (i % NUM_PIXELS), pixels.Color(255, 255, 0));
   }
 }
