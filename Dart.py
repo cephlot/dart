@@ -11,7 +11,6 @@ class Dart:
 
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
-        self.projector = None
         # self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         #cv.imshow("pic nice", self.reference)
         #cv.waitKey(0)
