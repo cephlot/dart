@@ -1,4 +1,5 @@
 
+from warnings import catch_warnings
 from cv2 import imshow
 from CoordinateProjector import CoordinateProjector
 from DartLocalization import DartLocalization
@@ -18,6 +19,7 @@ class ScoreEvaluator:
     '''
     def __init__(self, image_B_frames):
         self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
+        self.board_mask = cv.imread('images/board_mask.png', cv.IMREAD_GRAYSCALE)
         self.projectors = self.create_projectors(image_B_frames)
 
 
@@ -36,21 +38,34 @@ class ScoreEvaluator:
         coordinate_list         =  self.check_if_no_dart(coordinate_list)
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
         proj_coordinate_list    =  self.quality_control_projected_coordinates(proj_coordinate_list)
-        avarage_coordinate      =  self.average_coordinates(proj_coordinate_list)
-        # avarage_coordinate
+        average_coordinate      =  self.average_coordinates(proj_coordinate_list)
 
-
-        # testing TODO: remove this, return avarage_coordinate
+        
         image_ref = cv.imread('images\pic_nice.jpg')
 
         for _,proj in enumerate(proj_coordinate_list):
             test = cv.circle(image_ref, proj, 10, (250, 0, 0), 4)
             cv.imshow("yes", test)
             cv.waitKey(0)
-        test = cv.circle(image_ref, avarage_coordinate, 10, (0, 250, 0), 4)
+        test = cv.circle(image_ref, average_coordinate, 10, (0, 250, 0), 4)
         cv.imshow("yes", test)
         cv.waitKey(0)
-        return avarage_coordinate
+        return self.score_coordinate(average_coordinate)
+
+
+
+
+    def score_coordinate(self, coordinate):
+        '''
+        scores the avarage dart coordinate using the scoring mask
+        '''
+        score = 0
+        try:
+            score = self.board_mask[round(coordinate[1])][round(coordinate[0])]
+        except Exception as e:
+            print("Can't score dart, coordinate is outside of range")
+            print(e)
+        return score
 
 
     def error_check_image_length(self, image_B_frames,image_I_frames):
@@ -68,10 +83,6 @@ class ScoreEvaluator:
         coordinate_list = []
         for i, _ in enumerate(image_B_frames):
             x, y = DartLocalization.find_dart_point(image_B_frames[i], image_I_frames[i])
-            # test thing TODO remove this
-            if(i == 0):
-                x = 1100
-                y = 600
             pc = PredictedCoordinate(x,y,i)
             coordinate_list.append(pc)
         return coordinate_list
@@ -109,6 +120,13 @@ class ScoreEvaluator:
         return proj_coordinate_list
 
     def quality_control_projected_coordinates(self, proj_coordinate_list):
+        '''
+        Will remove a dart coordinate if:
+            Three coordinates exists
+            Distance from average coordinate is 1.3X further away than average distance from average coordinate
+            Distance from average coordinate is at least 5 pixels
+            Coordinate is furthest away
+        '''
         proj = proj_coordinate_list
         if(len(proj) != 3):
             return proj
@@ -117,12 +135,17 @@ class ScoreEvaluator:
         for c in proj:
             avarage_distance += self.distance(average, c)
         avarage_distance = avarage_distance / len(proj)
-        for i, c in enumerate(proj):
+        worst_c = None
+        for _, c in enumerate(proj):
             distanceFromAvarage = self.distance(average, c)
-            print(distanceFromAvarage)
-            print(avarage_distance)
-            if(distanceFromAvarage > avarage_distance*1.2 and distanceFromAvarage > 5):
-                proj.remove(c)
+            if(distanceFromAvarage > avarage_distance*1.5 and distanceFromAvarage > 10):
+                if(worst_c is None):
+                    worst_c = (c, distanceFromAvarage)
+                elif(distanceFromAvarage > worst_c[1]):
+                    worst_c = (c, distanceFromAvarage)
+        if(not (worst_c is None)):
+            print(f'quality_control_projected_coordinates: one bad dart cordinate, removing ({worst_c[0][1]},{worst_c[0][0]})')
+            proj.remove(worst_c[0])
         return proj
 
     def average_coordinates(self, coordinates):
