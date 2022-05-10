@@ -18,7 +18,7 @@ class CoordinateProjector:
         if (image_reference is None):
             print("Reference image is None on init for CoordinateProjector.")
         self.matrix = None
-        self.MIN_MATCH_COUNT = 10
+        self.MIN_MATCH_COUNT = 25
 
     def set_img_ref(self, image_reference):
         self.img_ref = image_reference
@@ -28,7 +28,7 @@ class CoordinateProjector:
         '''
         Generates a transformation matrix using a camera image and
         a static reference image
-        
+        Returns None if not enough matches are found
         '''
         if(img_cam is None):
             print("No image in generate_matrix, img_cam is None")
@@ -58,8 +58,7 @@ class CoordinateProjector:
             matrix, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
         else:
             print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
-
-
+            return None
         img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
         cv.imshow("original", img_cam)   
         cv.waitKey(0)

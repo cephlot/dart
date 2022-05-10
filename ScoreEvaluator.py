@@ -24,7 +24,7 @@ class ScoreEvaluator:
         self.DISTANCE_FACTOR = 1.1
         self.PIXEL_FACTOR = 10
 
-
+    "TODO: Make evaluate only generate new transformation matrix when new player by taking boolean parameter"
     def evaluate(self, image_B_frames, image_I_frames):
         '''
         Uses the RegionSegmenter and dart localizer thingy to score
@@ -33,6 +33,7 @@ class ScoreEvaluator:
             images from all cameras before dart is thrown 
         image_I_frames
             images from all cameras after dart is thrown
+        returns 0 if all transformations are bad
         ''' 
         if(self.error_check_image_length(image_B_frames, image_I_frames)):
             return 0
@@ -41,6 +42,8 @@ class ScoreEvaluator:
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
         proj_coordinate_list    =  self.quality_control_projected_coordinates(proj_coordinate_list)
         average_coordinate      =  self.average_coordinates(proj_coordinate_list)
+        if(average_coordinate is None):
+            return 0
 
         
         image_ref = cv.imread('images\pic_nice.jpg')
@@ -103,6 +106,7 @@ class ScoreEvaluator:
     def check_if_no_dart(self, coordinate_list):
         '''
         Removes darts from coordinate list that were not found
+        ----------
         @coordinate_list list of type PredictedCoordinate
         returns coordinate_list
         '''
@@ -117,9 +121,11 @@ class ScoreEvaluator:
         Projects all dart coordinates from DartLocalization.find_dart_point using the project_dart_coordinate method
         '''
         proj_coordinate_list = []
-        for _,c in enumerate(coordinate_list):
-            proj_coordinate_list.append(self.projectors[c.get_camera_index()].project_dart_coordinate((c.get_x(), c.get_y()))) 
+        for i,c in enumerate(coordinate_list):
+            if(not self.projectors[i] is None):
+                proj_coordinate_list.append(self.projectors[c.get_camera_index()].project_dart_coordinate((c.get_x(), c.get_y()))) 
         return proj_coordinate_list
+
 
     def quality_control_projected_coordinates(self, proj_coordinate_list):
         '''
@@ -130,7 +136,9 @@ class ScoreEvaluator:
             Coordinate is furthest away
         '''
         proj = self.check_negative_projection(proj_coordinate_list)
-        if(len(proj) != 3):
+        if(len(proj) == 0):
+            return None
+        elif(len(proj) != 3):
             return proj
         average = self.average_coordinates(proj)
         avarage_distance = 0
