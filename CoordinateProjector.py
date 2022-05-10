@@ -21,6 +21,12 @@ class CoordinateProjector:
         self.MIN_MATCH_COUNT = 25
 
     def set_img_ref(self, image_reference):
+        '''
+        Sets image reference.
+
+        :param self: Selb object.
+        :param image_reference: Image reference to change to.
+        '''
         self.img_ref = image_reference
 
     
@@ -28,7 +34,10 @@ class CoordinateProjector:
         '''
         Generates a transformation matrix using a camera image and
         a static reference image
-        Returns None if not enough matches are found
+        
+        :param self: Self object.
+        :param img_cam: Camera image.
+        :return: None if not enough matches are found
         '''
         if(img_cam is None):
             print("No image in generate_matrix, img_cam is None")
@@ -72,6 +81,10 @@ class CoordinateProjector:
         projects a coordinate from dart localization to a coordinate
         on the static mask image. Make sure to run generate_matrix
         in order to have a projection matrix for the projection.
+
+        :param self: Self object.
+        :param dart_coordinate: Coordinate to project.
+        :return: Real dart board coordinates.
         '''
         c = dart_coordinate
         if(self.matrix is None):
