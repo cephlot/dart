@@ -29,21 +29,6 @@ class Dart:
         evaluator = ScoreEvaluator(self.frames_before)
         return evaluator.evaluate(self.frames_before, self.frames_after)
 
-    def vote(scores):
-        '''
-        returns most common value or the max value if all values occur the same amount of times.
-        '''
-        most_freq = Dart.most_frequent(scores)
-        if (scores.count(most_freq) > 1):
-            return most_freq
-        return max(scores)
-
-    def most_frequent(List):
-        '''
-        Returns the most frequent element
-        '''
-        return max(set(List), key = List.count)
-
     def wait_detect(self):
         '''
         Waits for motion to be detected and then determines if there's a change 
