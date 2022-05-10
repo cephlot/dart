@@ -136,13 +136,13 @@ void update_flash(unsigned long since_effect_change) {
 }
 
 void update_loading(unsigned long since_effect_change) {
-  const int speed = 10;
+  const int speed = 50;
+  const int length = NUM_PIXELS / 2;
   uint16_t phase = since_effect_change * speed % 65536;
-  uint16_t first_led = (uint32_t)phase * NUM_PIXELS / 65535;
-  const uint16_t length = NUM_PIXELS / 4;
+  uint16_t position = (uint32_t)phase * NUM_PIXELS / 65535;
   pixels.setBrightness(255);
   pixels.clear();
-  for (uint16_t i = first_led; i < first_led + length; i++) {
-    pixels.setPixelColor(FIRST_PIXEL + (i % NUM_PIXELS), pixels.Color(255, 255, 0));
+  for (int i = 0; i < length; i++) {
+    pixels.setPixelColor(FIRST_PIXEL + ((position + i) % NUM_PIXELS), pixels.ColorHSV(10923, 255, pixels.gamma8(i * (255 / (length)))));
   }
 }
