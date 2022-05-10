@@ -5,54 +5,38 @@ from datetime import datetime
 from CameraSetup import cameraSetup
 
 class MotionDetector:
+    '''
+    Class for handling motion detection.
+    '''
+
     def __init__(self):
         bannedCam = cameraSetup.checkOS()
         self.camera_indices = cameraSetup.getCams(bannedCam)
         self.open_cameras()
         cameraSetup.stabilize(self.camera_indices, self.caps)
         print("Waiting for motion...")
-        
-        """
-        if platform == "linux" or platform == "linux2":
-            self.camera_indices = [1, 3]
-        elif platform == "darwin":
-            self.camera_indices = [1,2]
-        elif platform == "win32":
-            self.camera_indices = [1,2]
-        else:
-            raise RuntimeError("Unknown operating system")
-
-        self.open_cameras()
-
-
-        # Wait for cameras to stabilize
-        for i in range(50):
-            frames = self.read_frames()
-        print("Waiting for motion...")
-        """
     
     def __del__(self):
         for i in range(len(self.caps)):
             self.caps[i].release()
 
     def open_cameras(self):
+        '''
+        Opens the camera devices and populates list.
+
+        :param self: Self object.
+        '''
         self.caps = [None] * len(self.camera_indices)
         for i in range(len(self.caps)):
             self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
-        
-        """
-        # self.caps = [None] * len(self.camera_indices)
-        # for i in range(len(self.caps)):
-        #     self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
-        #     self.caps[i].set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        #     self.caps[i].set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        #     width = self.caps[i].get(cv2.CAP_PROP_FRAME_WIDTH)
-        #     height = self.caps[i].get(cv2.CAP_PROP_FRAME_HEIGHT)
-        #     if not self.caps[i].isOpened() or width != 1280 or height != 720:
-        #         raise IOError("Couldn't open camera " + str(self.camera_indices[i]))
-        """
     
     def read_frames(self):
+        '''
+        Reads frames from open capture devices.
+
+        :param self: Self object.
+        :return: A list of frames from each capture device.
+        '''
         frames = [None] * len(self.caps)
         for i in range(len(self.caps)):
             ret, frame = self.caps[i].read()
