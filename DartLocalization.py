@@ -30,7 +30,7 @@ class DartLocalization:
 
         contours, hierarchy = cv2.findContours(dart_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
-            return 0, 0
+            return -1,-1
 
         c = max(contours, key = cv2.contourArea)
 
