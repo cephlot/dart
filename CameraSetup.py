@@ -12,7 +12,7 @@ class cameraSetup:
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
         width = cap.get(cv.CAP_PROP_FRAME_WIDTH)
         height = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
-        if cap is None or not cap.isOpened() or width != 1280 or height != 720:
+        if cap is None or not cap.isOpened():
             print('Warning: unable to open video source: ', source)
             return 1
         return 0
