@@ -10,6 +10,10 @@ class ImageAnalyzer:
     def analyze(befores, afters):
         '''
         Analyzes two lists of images to see if there are differences.
+
+        :param befores: list of images before.
+        :param afters: list of images after.
+        :return: True if there is only one contour, False otherwise.
         '''
 
         for i, before in enumerate(befores):
