@@ -10,14 +10,12 @@ from PredictedCoordinate import PredictedCoordinate
 class ScoreEvaluator:
     '''
     Class that evaluates a score based on background image of board and image 
-    of board with dart
+    of board with dart.
+    Will use CoordinateProjector and DartLocalization to achive this.
     ------------
-    image_B
-        the image of an empty dart board
-    image_I
-        the image of an dart board with dart
-    NOTE: work in progress these attributes are temporary
-    ''' 
+    image_B_frames
+        images from all cameras before dart is thrown 
+    '''
     def __init__(self, image_B_frames):
         self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         self.projectors = self.create_projectors(image_B_frames)
@@ -26,6 +24,11 @@ class ScoreEvaluator:
     def evaluate(self, image_B_frames, image_I_frames):
         '''
         Uses the RegionSegmenter and dart localizer thingy to score
+        ------------
+        image_B_frames
+            images from all cameras before dart is thrown 
+        image_I_frames
+            images from all cameras after dart is thrown
         ''' 
         if(self.error_check_image_length(image_B_frames, image_I_frames)):
             return 0
@@ -34,18 +37,16 @@ class ScoreEvaluator:
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
         proj_coordinate_list    =  self.quality_control_projected_coordinates(proj_coordinate_list)
         avarage_coordinate      =  self.average_coordinates(proj_coordinate_list)
+        # avarage_coordinate
 
 
-        # testing
+        # testing TODO: remove this, return avarage_coordinate
         image_ref = cv.imread('images\pic_nice.jpg')
 
         for _,proj in enumerate(proj_coordinate_list):
-            print('YOOOOOO')
-            print(proj)
             test = cv.circle(image_ref, proj, 10, (250, 0, 0), 4)
             cv.imshow("yes", test)
             cv.waitKey(0)
-        print(avarage_coordinate)
         test = cv.circle(image_ref, avarage_coordinate, 10, (0, 250, 0), 4)
         cv.imshow("yes", test)
         cv.waitKey(0)
@@ -67,10 +68,10 @@ class ScoreEvaluator:
         coordinate_list = []
         for i, _ in enumerate(image_B_frames):
             x, y = DartLocalization.find_dart_point(image_B_frames[i], image_I_frames[i])
-            # test thing
+            # test thing TODO remove this
             if(i == 0):
-                x = 1000
-                y = 400
+                x = 1100
+                y = 600
             pc = PredictedCoordinate(x,y,i)
             coordinate_list.append(pc)
         return coordinate_list
@@ -96,7 +97,6 @@ class ScoreEvaluator:
             if c.get_x() < 0 and c.get_y() < 0:
                 print(f'No dart ({c.get_x()},{c.get_y()})')
                 del coordinate_list[i]
-            print(f'x: {c.get_x()}, y: {c.get_y()}')
         return coordinate_list
 
     def project_coordinates(self, coordinate_list):
@@ -118,9 +118,10 @@ class ScoreEvaluator:
             avarage_distance += self.distance(average, c)
         avarage_distance = avarage_distance / len(proj)
         for i, c in enumerate(proj):
-            distanceFromAvarage = self.distance(average, proj[0])
-            if(distanceFromAvarage > avarage_distance*1.2 and distanceFromAvarage > 30):
-                print("removing")
+            distanceFromAvarage = self.distance(average, c)
+            print(distanceFromAvarage)
+            print(avarage_distance)
+            if(distanceFromAvarage > avarage_distance*1.2 and distanceFromAvarage > 5):
                 proj.remove(c)
         return proj
 
