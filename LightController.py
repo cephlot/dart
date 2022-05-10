@@ -34,21 +34,3 @@ class LightController:
 
     def loading(self):
         self.ser.write(b'l')
-
-light_controller = LightController()
-
-# while True:
-light_controller.red()
-time.sleep(2)
-light_controller.green()
-time.sleep(2)
-light_controller.blue()
-time.sleep(2)
-light_controller.white()
-time.sleep(2)
-light_controller.rainbow()
-time.sleep(5)
-light_controller.flash()
-time.sleep(5)
-light_controller.loading()
-time.sleep(5)
