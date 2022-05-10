@@ -314,8 +314,8 @@ class RegionSegmenter:
         source = cv.cvtColor(source, cv.COLOR_BGR2LAB).astype("float32")
         target = cv.cvtColor(target, cv.COLOR_BGR2LAB).astype("float32")
         # compute color statistics for the source and target images
-        (lMeanSrc, lStdSrc, aMeanSrc, aStdSrc, bMeanSrc, bStdSrc) = image_stats(source)
-        (lMeanTar, lStdTar, aMeanTar, aStdTar, bMeanTar, bStdTar) = image_stats(target)
+        (lMeanSrc, lStdSrc, aMeanSrc, aStdSrc, bMeanSrc, bStdSrc) = RegionSegmenter.image_stats(source)
+        (lMeanTar, lStdTar, aMeanTar, aStdTar, bMeanTar, bStdTar) = RegionSegmenter.image_stats(target)
         # subtract the means from the target image
         (l, a, b) = cv.split(target)
         l -= lMeanTar
