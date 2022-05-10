@@ -41,9 +41,12 @@ def game():
             dart.wait()
             val += dart.get_score()
             score.config(text=f'Score: {val}')
-            window.config(bg='white')
+            score.config(bg='white')
             time.sleep(5)
-    
+
+        score.config(text=f'Get your darts!')
+        dart.wait_detect()
+
     score.pack_forget()
     button.grid(column=1, row=1, sticky=N+S+E+W)
     window.grid_columnconfigure(1,weight=50)
