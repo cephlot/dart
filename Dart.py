@@ -1,3 +1,5 @@
+from ImageAnalyzer import ImageAnalyzer
+
 import MotionDetector
 
 import cv2 as cv
@@ -35,8 +37,26 @@ class Dart:
         if (scores.count(most_freq) > 1):
             return most_freq
         return max(scores)
+
     def most_frequent(List):
         '''
         Returns the most frequent element
         '''
         return max(set(List), key = List.count)
+
+    def wait_detect(self):
+        '''
+        Waits for motion to be detected and then determines if there's a change 
+        of players.
+        '''
+
+        condition = False
+
+        while condition is False:
+            frames_before, frames_after = self.detector.wait_for_motion()
+
+            # analyse image
+            condition = ImageAnalyzer.analyze(self.frames_before, frames_after)
+
+        # Set new background
+        self.frames_before = frames_after
