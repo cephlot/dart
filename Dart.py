@@ -26,7 +26,6 @@ class Dart:
         Gets the score from a dart by using evaluator
         '''
         evaluator = ScoreEvaluator(self.frames_before)
-        cv.waitKey(0)
         return evaluator.evaluate(self.frames_before, self.frames_after)
 
     def vote(scores):
