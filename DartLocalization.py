@@ -1,19 +1,28 @@
 import cv2
 import numpy as np
+from ImageNormalizer import ImageNormalizer
+
 class DartLocalization:
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
+
+        image_with_dart = ImageNormalizer.normalize_image(image_with_dart)
+        image_without_dart = ImageNormalizer.normalize_image(image_without_dart)
         # denoised_image_without_dart = cv2.bilateralFilter(image_without_dart, d=5, sigmaColor=30, sigmaSpace=20)
         # denoised_image_with_dart = cv2.bilateralFilter(image_with_dart, d=5, sigmaColor=30, sigmaSpace=20)
         denoised_image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
         denoised_image_with_dart = cv2.GaussianBlur(image_with_dart, ksize=(5,5), sigmaX=0.0)
 
         image_color_diff = cv2.absdiff(src1=denoised_image_without_dart, src2=denoised_image_with_dart)
-        # cv2.imshow("Frame difference", image_color_diff)
+        cv2.imshow("Frame difference", image_color_diff)
         image_gray_diff = cv2.cvtColor(image_color_diff, cv2.COLOR_BGR2GRAY)
 
-        image_thresh = cv2.threshold(src=image_gray_diff, thresh=15, maxval=255, type=cv2.THRESH_BINARY)[1]
-        # cv2.imshow("Threshold", image_thresh)
+        blur = cv2.GaussianBlur(image_color_diff, (5,5), 0)
+        blur = cv2.bilateralFilter(blur, 9, 75, 75)
+
+        image_thresh = cv2.threshold(src=blur, thresh=0, maxval=255, type=cv2.THRESH_OTSU)[1]
+        #image_thresh = cv2.adaptiveThreshold(image_gray_diff, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 1027, 2)
+        cv2.imshow("Threshold", image_thresh)
 
         small_kernel = np.ones((5,5), np.uint8)
         big_kernel = np.ones((9,9), np.uint8)
@@ -21,12 +30,12 @@ class DartLocalization:
         image_thresh = cv2.dilate(image_thresh, big_kernel, iterations=1)
         image_thresh = cv2.erode(image_thresh, small_kernel, iterations=1)
         image_thresh = cv2.dilate(image_thresh, big_kernel, iterations=1)
-        # cv2.imshow("Dilate erode", image_thresh)
+        cv2.imshow("Dilate erode", image_thresh)
 
         image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_OPEN, kernel=(5,5), iterations=1)
 
         dart_mask = image_thresh
-        # cv2.imshow("dart mask", dart_mask)
+        cv2.imshow("dart mask", dart_mask)
 
         contours, hierarchy = cv2.findContours(dart_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
@@ -44,7 +53,7 @@ class DartLocalization:
         contour_mask = np.zeros((dart_mask.shape[0],dart_mask.shape[1],1), np.uint8)
         contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
         dart_mask = cv2.subtract(dart_mask, cv2.bitwise_not(contour_mask))
-        # cv2.imshow("Dart mask subtract", dart_mask)
+        cv2.imshow("Dart mask subtract", dart_mask)
 
         # calculate center of mass of dart pixels in binary image
         m = cv2.moments(dart_mask)
