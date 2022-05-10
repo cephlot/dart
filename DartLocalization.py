@@ -3,6 +3,7 @@ import numpy as np
 from ImageNormalizer import ImageNormalizer
 
 class DartLocalization:
+
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
 
@@ -10,18 +11,14 @@ class DartLocalization:
         image_without_dart = ImageNormalizer.normalize_image(image_without_dart)
         # denoised_image_without_dart = cv2.bilateralFilter(image_without_dart, d=5, sigmaColor=30, sigmaSpace=20)
         # denoised_image_with_dart = cv2.bilateralFilter(image_with_dart, d=5, sigmaColor=30, sigmaSpace=20)
-        denoised_image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
-        denoised_image_with_dart = cv2.GaussianBlur(image_with_dart, ksize=(5,5), sigmaX=0.0)
+        #denoised_image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
+        #denoised_image_with_dart = cv2.GaussianBlur(image_with_dart, ksize=(5,5), sigmaX=0.0)
 
-        image_color_diff = cv2.absdiff(src1=denoised_image_without_dart, src2=denoised_image_with_dart)
+        image_color_diff = cv2.absdiff(src1=image_without_dart, src2=image_with_dart)
         cv2.imshow("Frame difference", image_color_diff)
         image_gray_diff = cv2.cvtColor(image_color_diff, cv2.COLOR_BGR2GRAY)
 
-        blur = cv2.GaussianBlur(image_color_diff, (5,5), 0)
-        blur = cv2.bilateralFilter(blur, 9, 75, 75)
-
-        image_thresh = cv2.threshold(src=blur, thresh=0, maxval=255, type=cv2.THRESH_OTSU)[1]
-        #image_thresh = cv2.adaptiveThreshold(image_gray_diff, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 1027, 2)
+        image_thresh = cv2.threshold(src=image_gray_diff, thresh=0, maxval=255, type=cv2.THRESH_OTSU)[1]
         cv2.imshow("Threshold", image_thresh)
 
         small_kernel = np.ones((5,5), np.uint8)
@@ -45,17 +42,20 @@ class DartLocalization:
 
         # x,y,w,h = cv2.boundingRect(c)
         # dart_mask_contour = cv2.cvtColor(dart_mask.copy(), cv2.COLOR_GRAY2BGR)
-        # draw the biggest contour (c) in green
+        # #draw the biggest corners (c) in green
         # cv2.rectangle(dart_mask_contour,(x,y),(x+w,y+h),(0,255,0),2)
         # cv2.imshow("Contour", dart_mask_contour)
 
-        # Subtract everything outside contour
+            # Subtract everything outside contour
+
         contour_mask = np.zeros((dart_mask.shape[0],dart_mask.shape[1],1), np.uint8)
         contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
         dart_mask = cv2.subtract(dart_mask, cv2.bitwise_not(contour_mask))
         cv2.imshow("Dart mask subtract", dart_mask)
 
+
         # calculate center of mass of dart pixels in binary image
+        
         m = cv2.moments(dart_mask)
         center_of_mass_x = m["m10"] / m["m00"]
         center_of_mass_y = m["m01"] / m["m00"]
