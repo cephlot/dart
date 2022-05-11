@@ -3,7 +3,7 @@ import numpy as np
 from PointMaskHelper import generate_point_mask
 
 class RegionSegmenter:
-    '''
+    """
     Class that segments an image of the dart board (no dart!)
 
     Attributes:
@@ -29,7 +29,7 @@ class RegionSegmenter:
     mask_inner_bullseye
         mask of point regions
     NOTE: masks can be changed, not sure if all of these are needed or correct
-    '''
+    """
     def __init__(self, image):
         self.image = image
         self.color_mask = None
@@ -44,10 +44,13 @@ class RegionSegmenter:
 
         self.bbox = None
 
-    def segment(self, closest_score):   
-        '''
-        OBS: set closest_score to score region nearest camera
-        '''
+    def segment(self, closest_score):  
+        """Segments the board with current configuration
+
+        :param closest_score: closest scoring region
+        :type closest_score: int
+        """
+
         self.crop_board()
         self.multiplier_mask()
         self.scoring_region()
@@ -58,6 +61,8 @@ class RegionSegmenter:
         self.create_point_mask(closest_score)
         
     def crop_board(self):
+        """Crops the board with current configuration
+        """
 
         # Create a greyscale of the board and use otsu to extract the foreground
         grayscale = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
@@ -80,6 +85,8 @@ class RegionSegmenter:
         self.foreground = foreground
 
     def multiplier_mask(self):
+        """Creates multiplier mask with curernt configuration
+        """
 
         if (self.foreground is None):
             print("multiplier_mask: The foreground was empty")
@@ -101,6 +108,8 @@ class RegionSegmenter:
         self.color_mask = thresholded
 
     def scoring_region(self):
+        """Creates the scoring region with current configuration
+        """
 
         if (self.color_mask is None):
             print("scoring_region: The color mask was empty")
@@ -130,6 +139,8 @@ class RegionSegmenter:
         self.mask_scoring_area = area
 
     def get_mask_1x(self):
+        """Create the 1x scoring mask with current configuration
+        """
 
         if (self.mask_scoring_area is None):
             print("get_mask_1x: The scoring area mask was empty")
@@ -147,6 +158,8 @@ class RegionSegmenter:
         self.mask_1x = image
 
     def get_mask_2x(self):
+        """Create the 2x scoring mask with current configuration
+        """
 
         if (self.mask_1x is None):
             print("get_mask_2x: The 1x multiplier mask was empty")
@@ -174,6 +187,8 @@ class RegionSegmenter:
         self.mask_2x = result
 
     def get_mask_3x(self):
+        """Create the 3x scoring mask with current configuration
+        """
 
         if (self.color_mask is None):
             print("get_mask_3x: The color mask was empty")
@@ -218,6 +233,8 @@ class RegionSegmenter:
         self.mask_3x = mask_3x
 
     def get_bullseye_masks(self):
+        """Create bullseye masks with current configuration
+        """
         
         if (self.mask_scoring_area is None):
             print("get_bullseye_masks: The scoring area mask was empty")
@@ -285,17 +302,26 @@ class RegionSegmenter:
 
     
     def create_point_mask(self, closest_score):
-        '''
-        Generates the point mask for the board. Give the point of the
+        """Generates the point mask for the board. Give the point of the
         region to the bottom middle of the image in order for
         point regions to be assigned correctly!
-        '''
+
+        :param closest_score: closests scoring region
+        :type closest_score: int
+        """
+
         self.mask_points = generate_point_mask(self.foreground, self.mask_scoring_area, closest_score)
 
     def image_stats(image):
-        '''
-        Computes the mean and standard deviation of each color channel
-        '''
+        """Computes the mean and standard deviation of each color channel
+
+
+        :param image: image to compute stats for
+        :type image: image
+        :return: tuple of l-, a-, b-means and  l-, a-, b-standard deviations
+        :rtype: (int, int, int, int, int, int)
+        """
+
         (l, a, b) = cv.split(image)
         (lMean, lStd) = (l.mean(), l.std())
         (aMean, aStd) = (a.mean(), a.std())
@@ -304,13 +330,20 @@ class RegionSegmenter:
         return (lMean, lStd, aMean, aStd, bMean, bStd)
 
     def color_transfer(source, target):
-        '''
-        Convert the image from a RGB to a LAB color space to make transfer simplier,
+        """Convert the image from a RGB to a LAB color space to make transfer simplier,
         Takes the source image as a "color reference" for the target, generating a modified
         image with matching colors
 
         This code is backup in case auto white balancing does not work.
-        '''
+
+        :param source: source image
+        :type source: image
+        :param target: target imge
+        :type target: image
+        :return: modified image
+        :rtype: image
+        """
+
         source = cv.cvtColor(source, cv.COLOR_BGR2LAB).astype("float32")
         target = cv.cvtColor(target, cv.COLOR_BGR2LAB).astype("float32")
         # compute color statistics for the source and target images
