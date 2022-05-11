@@ -9,8 +9,6 @@ class CoordinateProjector:
     https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html
     
     First generate Matrix and then project the coordinates.
-
-    
     '''
     
     def __init__(self, image_reference):
@@ -18,11 +16,10 @@ class CoordinateProjector:
         if (image_reference is None):
             print("Reference image is None on init for CoordinateProjector.")
         self.matrix = None
-        self.MIN_MATCH_COUNT = 25
+        self.MIN_MATCH_COUNT = 35
 
     def set_img_ref(self, image_reference):
         """Sets image reference
-
         :param image_reference: image to change to
         :type image_reference: image
         """
@@ -32,7 +29,6 @@ class CoordinateProjector:
     def generate_matrix(self, img_cam):
         """Generates a transformation metrix using a camera image and a static
         reference image
-
         :param img_cam: Camera image
         :type img_cam: image
         :return: None if not enough matches are found
@@ -41,10 +37,35 @@ class CoordinateProjector:
         if(img_cam is None):
             print("No image in generate_matrix, img_cam is None")
             return np.zeros((3,3))
+        kp1, kp2, matches = self.get_matches_and_keypoints(img_cam)
+        good = self.get_good_matches(matches)
+        matrix = None
+        print("SIFT good matches: " + str(len(good)))
+        if len(good)>self.MIN_MATCH_COUNT:
+            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+            matrix, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
+        else:
+            print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
+            return None
+        '''img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
+        cv.imshow("original", img_cam)   
+        cv.waitKey(0)
+        cv.imshow("warped", img_warped)   
+        cv.waitKey(0)'''
+        self.matrix = matrix
 
-        # Initiate SIFT detector
+
+    def get_matches_and_keypoints(self, img_cam):
+        '''
+        Uses SIFT and FLANN-based matcher on img_cam and img_ref to get the keypoints and matches between images.
+        -------------
+        @param img_cam cameras picture
+        @return kp1 keypoints from camera
+        @return kp2 keypoints from reference picture
+        @return matches match list between keypoints
+        '''
         sift = cv.SIFT_create(400)
-        # find the keypoints and descriptors with SIFT
         kp1, des1 = sift.detectAndCompute(img_cam,None)
         kp2, des2 = sift.detectAndCompute(self.img_ref,None)
         FLANN_INDEX_KDTREE = 1
@@ -52,34 +73,22 @@ class CoordinateProjector:
         search_params = dict(checks = 50)
         flann = cv.FlannBasedMatcher(index_params, search_params)
         matches = flann.knnMatch(des1,des2,k=2)
-        # store all the good matches as per Lowe's ratio test.
+        return kp1, kp2, matches
+
+    def get_good_matches(self, matches):
+        '''
+        Store all the good matches as per Lowe's ratio test.
+        '''
         good = []
         for m,n in matches:
             if m.distance < 0.7*n.distance:
                 good.append(m)
-        matrix = None
-        print("SIFT good matches: " + str(len(good)))
-        if len(good)>self.MIN_MATCH_COUNT:
-            # good = good[:10]
-            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-            matrix, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
-        else:
-            print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
-            return None
-        img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
-        cv.imshow("original", img_cam)   
-        cv.waitKey(0)
-        cv.imshow("warped", img_warped)   
-        cv.waitKey(0)
-        self.matrix = matrix
-
+        return good
 
     def project_dart_coordinate(self, dart_coordinate):
         """Projects a coordinate from dart localization to a coordinate on a 
         static mask image. Make sure to run generate_matrix in order to have a 
         projection matrix for the projection
-
         :param dart_coordinate: Coordinate to project
         :type dart_coordinate: (int,int)
         :return: Real dart board coordinates
@@ -93,3 +102,8 @@ class CoordinateProjector:
         c = np.array([c])
         c = cv.perspectiveTransform(c, self.matrix)
         return (int(c[0][0][0]), int(c[0][0][1]))
+
+    def hasMatrix(self):
+        if(self.matrix is None):
+            return False
+        return True
