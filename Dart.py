@@ -26,10 +26,6 @@ class Dart:
         self.GUI.choose_player_amount(lambda x: self.create_game(x))
 
     def create_game(self, player_count):
-
-        #number_of_players = self.GUI.choose_player_amount()
-        #self.game_mode.start_game(number_of_players)
-
         print("Player_count", player_count)
         self.game_mode.start_game(player_count)
 
@@ -107,8 +103,9 @@ class Dart:
         print("Game over!")
 
 
-dart = Dart()
-dart.start()
+if __name__ == '__main__':
+    dart = Dart()
+    dart.start()
 
 
 
