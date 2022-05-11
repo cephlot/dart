@@ -17,10 +17,13 @@ class Dart:
         #cv.imshow("pic nice", self.reference)
         #cv.waitKey(0)
 
-    def wait(self):
+    def wait(self, first_dart):
         frames_before, frames_after = self.detector.wait_for_motion()
         self.frames_before = frames_before
         self.frames_after = frames_after
+
+        if(first_dart):
+            self.frames_before_before = frames_before
 
     def get_score(self):
         '''
@@ -43,7 +46,7 @@ class Dart:
             frames_before, frames_after = self.detector.wait_for_motion()
 
             # analyse image
-            condition = ImageAnalyzer.analyze(self.frames_before, frames_after)
+            condition = ImageAnalyzer.analyze(self.frames_before_before, frames_after)
 
         # Set new background
         self.frames_before = frames_after

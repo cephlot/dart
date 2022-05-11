@@ -38,7 +38,7 @@ def game():
         for i in range(3):
             score.config(bg='green')
             score.config(text='Score: ')
-            dart.wait()
+            dart.wait(i == 0)
             val += dart.get_score()
             score.config(text=f'Score: {val}')
             score.config(bg='white')
