@@ -12,11 +12,11 @@ class CoordinateProjector:
     '''
     
     def __init__(self, image_reference):
-        self.img_ref = image_reference
         if (image_reference is None):
             print("Reference image is None on init for CoordinateProjector.")
+        self.img_ref = image_reference
         self.matrix = None
-        self.MIN_MATCH_COUNT = 35
+        self.MIN_MATCH_COUNT = 5
 
     def set_img_ref(self, image_reference):
         """Sets image reference
@@ -34,6 +34,7 @@ class CoordinateProjector:
         :return: None if not enough matches are found
         :rtype: None
         """
+        img_ref = self.img_ref
         if(img_cam is None):
             print("No image in generate_matrix, img_cam is None")
             return np.zeros((3,3))
@@ -44,7 +45,12 @@ class CoordinateProjector:
         if len(good)>self.MIN_MATCH_COUNT:
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-            matrix, _ = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
+            matrix, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
+            matchesMask = mask.ravel().tolist()
+            h,w = img_cam.shape
+            pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+            dst = cv.perspectiveTransform(pts,matrix)
+            img_ref = cv.polylines(img_ref,[np.int32(dst)],True,255,3, cv.LINE_AA)
         else:
             print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
             return None
@@ -53,6 +59,15 @@ class CoordinateProjector:
         cv.waitKey(0)
         cv.imshow("warped", img_warped)   
         cv.waitKey(0)'''
+        '''draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+                   singlePointColor = None,
+                   matchesMask = matchesMask, # draw only inliers
+                   flags = 2)
+        image_pog = cv.warpPerspective(img_cam, matrix, (img_cam.shape[0], img_ref.shape[1]))
+        img3 = cv.drawMatches(img_cam,kp1,image_pog,kp2,good,None,**draw_params)
+        cv.imshow(f"good matches are {len(good)}", img3)'''
+
+
         self.matrix = matrix
 
 
@@ -70,7 +85,7 @@ class CoordinateProjector:
         kp2, des2 = sift.detectAndCompute(self.img_ref,None)
         FLANN_INDEX_KDTREE = 1
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
-        search_params = dict(checks = 50)
+        search_params = dict(checks = 10)
         flann = cv.FlannBasedMatcher(index_params, search_params)
         matches = flann.knnMatch(des1,des2,k=2)
         return kp1, kp2, matches

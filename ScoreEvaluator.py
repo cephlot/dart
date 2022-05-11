@@ -44,14 +44,14 @@ class ScoreEvaluator:
         average_coordinate      =  self.average_coordinates(proj_coordinate_list)
         if(average_coordinate is None):
             return 0
-        
-        '''image_ref = cv.imread('images\pic_nice.jpg')
+        """ 
+        image_ref = cv.imread('images\pic_nice.jpg')
         test = image_ref
         for _,proj in enumerate(proj_coordinate_list):
             test = cv.circle(test, proj, 10, (250, 0, 0), 4)
         test = cv.circle(test, average_coordinate, 8, (0, 250, 0), 3)
         cv.imshow("yes", test)
-        cv.waitKey(0)'''
+        cv.waitKey(0) """
         return self.score_coordinate(average_coordinate)
 
 
