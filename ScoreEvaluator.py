@@ -9,14 +9,12 @@ from PredictedCoordinate import PredictedCoordinate
 
 
 class ScoreEvaluator:
-    '''
+    """
     Class that evaluates a score based on background image of board and image 
     of board with dart.
     Will use CoordinateProjector and DartLocalization to achive this.
-    ------------
-    image_B_frames
-        images from all cameras before dart is thrown 
-    '''
+    """
+
     def __init__(self, image_B_frames):
         self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         self.board_mask = cv.imread('images/board_mask.png', cv.IMREAD_GRAYSCALE)
@@ -26,15 +24,16 @@ class ScoreEvaluator:
 
     "TODO: Make evaluate only generate new transformation matrix when new player by taking boolean parameter"
     def evaluate(self, image_B_frames, image_I_frames):
-        '''
-        Uses the RegionSegmenter and dart localizer thingy to score
-        ------------
-        image_B_frames
-            images from all cameras before dart is thrown 
-        image_I_frames
-            images from all cameras after dart is thrown
-        returns 0 if all transformations are bad
-        ''' 
+        """Uses the RegionSegmenter and dart localizer to score
+
+        :param image_B_frames: images from all cameras before dart is thrown
+        :type image_B_frames: list
+        :param image_I_frames: images from all cameras after dart is thrown
+        :type image_I_frames: list
+        :return: 0 if all transformations are bad
+        :rtype: int
+        """
+        
         if(self.error_check_image_length(image_B_frames, image_I_frames)):
             return 0
         coordinate_list         =  self.get_dart_coordinates(image_B_frames, image_I_frames)
@@ -44,7 +43,6 @@ class ScoreEvaluator:
         average_coordinate      =  self.average_coordinates(proj_coordinate_list)
         if(average_coordinate is None):
             return 0
-
         
         image_ref = cv.imread('images\pic_nice.jpg')
 
@@ -58,12 +56,15 @@ class ScoreEvaluator:
         return self.score_coordinate(average_coordinate)
 
 
-
-
     def score_coordinate(self, coordinate):
-        '''
-        scores the avarage dart coordinate using the scoring mask
-        '''
+        """Scors the average dart coordinate using scoring mask
+
+        :param coordinate: coordinate to compute from
+        :type coordinate: list
+        :return: score 
+        :rtype: int
+        """
+        
         score = 0
         try:
             score = self.board_mask[round(coordinate[1])][round(coordinate[0])]
@@ -72,19 +73,35 @@ class ScoreEvaluator:
             print(e)
         return score
 
-
     def error_check_image_length(self, image_B_frames,image_I_frames):
+        """Checks the length of image lists
+
+        :param image_B_frames: list of images before
+        :type image_B_frames: list
+        :param image_I_frames: list of images after
+        :type image_I_frames: list
+        :return: 1 if the lengths aren't the same, 0 otherwise
+        :rtype: int
+        """
+
         if(len(image_B_frames) != len(image_I_frames)):
             print("ERROR: Different length of image_B_frames and image_I_frames in evaluator")
             return 1
         return 0
 
     def get_dart_coordinates(self, image_B_frames, image_I_frames):
-        '''
-        Returns all dart coordinate estimates found by DartLocalization using all cameras before and after images
+        """ Returns all dart coordinate estimates found by DartLocalization using all cameras before and after images
         Coordinates returned are PredictedCoordinate objects. this is done to keep track of
         what coordinates are from what camera even after deleting some bad coordinates
-        '''
+
+        :param image_B_frames: list of images before dart is thrown
+        :type image_B_frames: list
+        :param image_I_frames: list of images after dart is thrown
+        :type image_I_frames: list
+        :return: list of coordinates
+        :rtype: list
+        """
+
         coordinate_list = []
         for i, _ in enumerate(image_B_frames):
             x, y = DartLocalization.find_dart_point(image_B_frames[i], image_I_frames[i])
@@ -93,9 +110,15 @@ class ScoreEvaluator:
         return coordinate_list
 
     def create_projectors(self, image_B_frames):
-        '''
-        Creates projectors and their projection matrix for all cameras 
-        '''
+        """Creates projectors and their projection matrix for all cameras 
+
+
+        :param image_B_frames: images before dart is thrown
+        :type image_B_frames: list
+        :return: projectors
+        :rtype: list
+        """
+
         projectors = []
         for i, image_b in enumerate(image_B_frames):
             projectors.append(CoordinateProjector(self.reference))
@@ -104,12 +127,14 @@ class ScoreEvaluator:
         return projectors
 
     def check_if_no_dart(self, coordinate_list):
-        '''
-        Removes darts from coordinate list that were not found
-        ----------
-        @coordinate_list list of type PredictedCoordinate
-        returns coordinate_list
-        '''
+        """Removes darrts from coordinate list that were not found
+
+        :param coordinate_list: list of coordinates
+        :type coordinate_list: list
+        :return: coordinate list
+        :rtype: list
+        """
+        
         for i, c in enumerate(coordinate_list):
             if c.get_x() < 0 and c.get_y() < 0:
                 print(f'No dart ({c.get_x()},{c.get_y()})')
@@ -117,9 +142,15 @@ class ScoreEvaluator:
         return coordinate_list
 
     def project_coordinates(self, coordinate_list):
-        '''
-        Projects all dart coordinates from DartLocalization.find_dart_point using the project_dart_coordinate method
-        '''
+        """Projects all dart coordinates from DartLocalization.find_dart_point using the project_dart_coordinate method
+
+
+        :param coordinate_list: coordinate list
+        :type coordinate_list: list
+        :return: projected coordinate list
+        :rtype: list
+        """
+
         proj_coordinate_list = []
         for i,c in enumerate(coordinate_list):
             if(not self.projectors[i] is None):
@@ -128,13 +159,18 @@ class ScoreEvaluator:
 
 
     def quality_control_projected_coordinates(self, proj_coordinate_list):
-        '''
-        Will remove a dart coordinate if:
+        """Will remove a dart coordinate if:
             Three coordinates exists
             Distance from average coordinate is 1.3X further away than average distance from average coordinate
             Distance from average coordinate is at least 5 pixels
             Coordinate is furthest away
-        '''
+
+        :param proj_coordinate_list: projected coordinates list
+        :type proj_coordinate_list: list
+        :return: filtered list
+        :rtype: list
+        """
+
         proj = self.check_negative_projection(proj_coordinate_list)
         if(len(proj) == 0):
             return None
@@ -159,6 +195,14 @@ class ScoreEvaluator:
         return proj
     
     def check_negative_projection(self,coordinates):
+        """Checks for negative projections and filters them out
+
+        :param coordinates: coordinate list
+        :type coordinates: list
+        :return: filtered list
+        :rtype: list
+        """
+
         for c in coordinates:
             if(c[0] < 0 or c[1] < 0):
                 coordinates.remove(c)
@@ -167,10 +211,26 @@ class ScoreEvaluator:
         return coordinates
 
     def average_coordinates(self, coordinates):
+        """Calculates the average coordinates
+
+        :param coordinates: coordinate list
+        :type coordinates: list
+        :return: average coordinates
+        :rtype: (int,int)
+        """
         c = [sum(x)/len(x) for x in zip(*coordinates)]
         return ((round(c[0])),round(c[1]))
 
     def distance(self, c1, c2):
+        """Finds distance between two coordinates
+
+        :param c1: first coordinate
+        :type c1: (int,int)
+        :param c2: second coordinate
+        :type c2: (int,int)
+        :return: distance between the coordinates
+        :rtype: float
+        """
         x1, y1 = c1
         x2, y2 = c2
         return ((x1 - x2)**2 + (y1 - y2)**2)**0.5

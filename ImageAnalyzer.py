@@ -2,15 +2,21 @@ import cv2 as cv
 import numpy as np
 
 class ImageAnalyzer:
-    '''
+    """
     Class containing methods for detecting differences in images.
-    '''
+    """
 
     @staticmethod
     def analyze(befores, afters):
-        '''
-        Analyzes two lists of images to see if there are differences.
-        '''
+        """Analyzes two lists of images to see if there are differences
+
+        :param befores: list of images before
+        :type befores: list
+        :param afters: list of images after
+        :type afters: list
+        :return: True if there is one contour, otherwise False
+        :rtype: bool
+        """
 
         for i, before in enumerate(befores):
             before = cv.cvtColor(before, cv.COLOR_BGR2GRAY)
