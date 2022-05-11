@@ -29,7 +29,7 @@ class ImageAnalyzer:
             thresh_frame = cv.threshold(src=diff_frame, thresh=18, maxval=255, type=cv.THRESH_BINARY)[1]
             thresh_frame = cv.erode(src=thresh_frame, kernel=np.ones((6,6)))
 
-            contours,  = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            contours, _  = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
             print(len(contours))
             if len(contours) == 0:
