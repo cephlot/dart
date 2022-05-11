@@ -21,24 +21,23 @@ class CoordinateProjector:
         self.MIN_MATCH_COUNT = 25
 
     def set_img_ref(self, image_reference):
-        '''
-        Sets image reference.
+        """Sets image reference
 
-        :param self: Selb object.
-        :param image_reference: Image reference to change to.
-        '''
+        :param image_reference: image to change to
+        :type image_reference: image
+        """
         self.img_ref = image_reference
 
     
     def generate_matrix(self, img_cam):
-        '''
-        Generates a transformation matrix using a camera image and
-        a static reference image
-        
-        :param self: Self object.
-        :param img_cam: Camera image.
+        """Generates a transformation metrix using a camera image and a static
+        reference image
+
+        :param img_cam: Camera image
+        :type img_cam: image
         :return: None if not enough matches are found
-        '''
+        :rtype: None
+        """
         if(img_cam is None):
             print("No image in generate_matrix, img_cam is None")
             return np.zeros((3,3))
@@ -77,15 +76,15 @@ class CoordinateProjector:
 
 
     def project_dart_coordinate(self, dart_coordinate):
-        '''
-        projects a coordinate from dart localization to a coordinate
-        on the static mask image. Make sure to run generate_matrix
-        in order to have a projection matrix for the projection.
+        """Projects a coordinate from dart localization to a coordinate on a 
+        static mask image. Make sure to run generate_matrix in order to have a 
+        projection matrix for the projection
 
-        :param self: Self object.
-        :param dart_coordinate: Coordinate to project.
-        :return: Real dart board coordinates.
-        '''
+        :param dart_coordinate: Coordinate to project
+        :type dart_coordinate: (int,int)
+        :return: Real dart board coordinates
+        :rtype: (int,int)
+        """
         c = dart_coordinate
         if(self.matrix is None):
             print("ERROR in project_dart_coordinate, projection matrix is None")

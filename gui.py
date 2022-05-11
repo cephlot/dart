@@ -12,19 +12,18 @@ window.attributes('-fullscreen', True)
 button = Button(window)
 
 def start_game():
-    '''
+    """
     Creates a new game in a new thread.
-    '''
+    """
     button.pack_forget()
     t = threading.Thread(target=game)
     t.start()
 
 def game():
-    '''
-    Simulates a game of dart. Three throws per player.
+    """Simulates a game of dart. Three throws per player.
     Displays the score after each throw.
     Uses Dart.py to simulate the game.
-    '''
+    """
     score = Label(window, font=('Courier',44), bg='white')
     score.config(anchor=CENTER)
     score.config(text='Welcome to dart!', bg='white')

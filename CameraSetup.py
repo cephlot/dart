@@ -1,22 +1,20 @@
-from time import sleep
 import cv2 as cv
 from sys import platform
-from datetime import datetime
-
 
 class cameraSetup:
-    '''
+    """
     Class providing methods for camera init.
-    '''
+    """
     
     @staticmethod
     def testDevice(source):
-        '''
-        Static method testing if a source can be opened
+        """Test if capture device can be opened
 
-        :param source: Camera source to be tested
-        :return: 0 if source can be opened, otherwise 1
-        '''
+        :param source: capture device index
+        :type source: int
+        :return: 0 if can open, 1 otherwise
+        :rtype: int
+        """
         cap = cv.VideoCapture(source)
         cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
@@ -29,12 +27,13 @@ class cameraSetup:
 
     @staticmethod
     def getCams(exception):
-        '''
-        Static method to get valid cameras.
+        """Get list of capture devices, with exception
 
-        :param exception: Excluded camera
-        :returns: A list of valid cameras.
-        '''
+        :param exception: exception index
+        :type exception: int
+        :return: list of capture devices
+        :rtype: list
+        """        
         valid_cams = []
         for i in range(8):
             if i is not exception:
@@ -44,12 +43,12 @@ class cameraSetup:
 
     @staticmethod
     def checkOS():
-        '''
-        Static method to check which OS is running. Raises exception if running 
-        on anything other than linux, darwin or win32.
+        """Checks which OS is currently running
 
-        :return: 1 if platform is darwin, 0 if linux or win32.
-        '''
+        :raises RuntimeError: If running on unknown OS
+        :return: 0 if linux or win32, 1 if darwin
+        :rtype: int
+        """        
         if platform == "linux" or platform == "linux2":
             return 0
         elif platform == "darwin":
@@ -61,12 +60,13 @@ class cameraSetup:
 
     @staticmethod
     def stabilize(camera_indices, caps):
-        '''
-        Static method that waits until cameras are stable.
+        """Waits until cameras are stable
 
-        :param camera_indices: Cameras indices to read from.
-        :param caps: Capture devices to read from.
-        '''
+        :param camera_indices: camera indices to wait for
+        :type camera_indices: list
+        :param caps: capture devices to wait for
+        :type caps: list
+        """        
         for cameras in range(len(camera_indices)):
             for i in range(50):
                 ret, frame = caps[cameras].read()

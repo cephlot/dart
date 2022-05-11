@@ -3,14 +3,15 @@ import numpy as np
 class DartLocalization:
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
-        '''
-        Predicts the coordinate of a dart point.
-        @param image_without_dart
-        @param image_with_dart
-        return
-            x
-            y
-        '''
+        """Predicts the coordinate of a dart point
+
+        :param image_without_dart: image without dart
+        :type image_without_dart: image
+        :param image_with_dart: image with dart
+        :type image_with_dart: image
+        :return: coordinate of dart point
+        :rtype: (int,int)
+        """
         denoised_image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
         denoised_image_with_dart = cv2.GaussianBlur(image_with_dart, ksize=(5,5), sigmaX=0.0)
 

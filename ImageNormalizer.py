@@ -4,6 +4,14 @@ import numpy as np
 class ImageNormalizer:
     @staticmethod
     def green_color_mask(img):
+        """Creates a green color mask
+
+        :param img: image to create mask of
+        :type img: image
+        :return: green color mask
+        :rtype: image
+        """        
+
         #convert the BGR image to HSV colour space
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -28,6 +36,14 @@ class ImageNormalizer:
 
     @staticmethod
     def red_color_mask(img):
+        """Creates a red color mask
+
+        :param img: image to create mask of
+        :type img: image
+        :return: red color mask
+        :rtype: image
+        """        
+
         #convert the BGR image to HSV colour space
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -55,6 +71,16 @@ class ImageNormalizer:
 
     @staticmethod
     def image_colorfulness(image, sigma):
+        """Change the saturation of the image
+
+        :param image: image to manipulate
+        :type image: image
+        :param sigma: saturation factor
+        :type sigma: float
+        :return: saturated image
+        :rtype: image
+        """
+
         hsvImg = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
 
         #multiple by a factor to change the saturation
@@ -64,11 +90,29 @@ class ImageNormalizer:
 
     @staticmethod
     def normalize_image(img):
+        """Normalizes the image
+
+        :param img: image to normalize
+        :type img: image
+        :return: normalized image
+        :rtype: image
+        """
+
         white_balance_corrected = ImageNormalizer.white_balance(img)
         return ImageNormalizer.normalize_brightness(white_balance_corrected)
 
     @staticmethod
     def normalize_image_spec_green(img, sigma):
+        """Normalizes image w.r.t. gren
+
+        :param img: image to normalize
+        :type img: image
+        :param sigma: saturation factor
+        :type sigma: float
+        :return: green-normalized image
+        :rtype: image
+        """
+
         white_balance_corrected = ImageNormalizer.white_balance(img)
         normal_brightness = ImageNormalizer.normalize_brightness(white_balance_corrected)
         img_green = ImageNormalizer.green_color_mask(white_balance_corrected)
@@ -78,7 +122,17 @@ class ImageNormalizer:
         return ret
     
     @staticmethod
-    def normalize_image_spec_red(img, sigma ):
+    def normalize_image_spec_red(img, sigma):
+        """Normalizes image w.r.t. red
+
+        :param img: image to normalize
+        :type img: image
+        :param sigma: saturation factor
+        :type sigma: float
+        :return: red-normalized image
+        :rtype: image
+        """
+
         white_balance_corrected = ImageNormalizer.white_balance(img)
         normal_brightness = ImageNormalizer.normalize_brightness(white_balance_corrected)
         img_red = ImageNormalizer.red_color_mask(white_balance_corrected)
@@ -90,6 +144,14 @@ class ImageNormalizer:
 
     @staticmethod
     def white_balance(img):
+        """Automatically normalizes the white balance of the image
+
+        :param img: image to normalize
+        :type img: image
+        :return: white-balanced image
+        :rtype: image
+        """
+
         # https://stackoverflow.com/questions/46390779/automatic-white-balancing-with-grayworld-assumption
         result = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
         avg_a = np.average(result[:, :, 1])
@@ -101,6 +163,14 @@ class ImageNormalizer:
 
     @staticmethod
     def normalize_brightness(img):
+        """Normalizes the brightness of the image
+
+        :param img: image to normalize
+        :type img: image
+        :return: brightness-normalized image
+        :rtype: image
+        """
+
         # https://linuxtut.com/en/9c9fc6c0e9e8a9d05800/
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         h,s,v = cv2.split(hsv)
@@ -108,9 +178,6 @@ class ImageNormalizer:
         v = v-np.mean(v) + 128
         v = np.clip(v,0,255)
         result = np.array(v, dtype=np.uint8)
-        
-        # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        # result = clahe.apply(result)
 
         hsv = cv2.merge((h,s,result))
         res = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
