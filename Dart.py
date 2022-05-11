@@ -1,6 +1,6 @@
 from ImageAnalyzer import ImageAnalyzer
 from ScoreEvaluator import ScoreEvaluator
-from GameMode import GameMode301
+from GameMode import GameMode301, GameStatus
 from GUI import Game_GUI
 
 from Requester import Requester
@@ -26,10 +26,6 @@ class Dart:
         self.GUI.choose_player_amount(lambda x: self.create_game(x))
 
     def create_game(self, player_count):
-
-        #number_of_players = self.GUI.choose_player_amount()
-        #self.game_mode.start_game(number_of_players)
-
         print("Player_count", player_count)
         self.game_mode.start_game(player_count)
 
@@ -74,16 +70,16 @@ class Dart:
         self.detector.open_cameras()
         self.GUI.show_waiting_screen()
 
-        time.sleep(3)
-        self.wait()
+        while self.game_mode.get_game_status() == GameStatus.ONGOING:
+            self.wait()
+            score = self.get_score()
+            self.GUI.show_score(score)
+            self.game_mode.give_points(score)
 
-        score = self.get_score()
 
-        self.GUI.show_score(score)
-
-
-dart = Dart()
-dart.start()
+if __name__ == '__main__':
+    dart = Dart()
+    dart.start()
 
 
 
