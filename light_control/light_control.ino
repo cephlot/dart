@@ -1,20 +1,12 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN 6
+#define MAX_BRIGHTNESS 255
 
-// Uncomment to use small pixel ring for prototyping
-//#define USE_PROTOTYPE
-#ifdef USE_PROTOTYPE
-#define TOTAL_PIXELS 16 /* Total number of connected pixels */
-#define NUM_PIXELS 16 /* Number of used pixels */
-#define FIRST_PIXEL 0 /* First used pixel */
-#define COLOR_MODE NEO_GRB
-#else
 #define TOTAL_PIXELS 50 /* Total number of connected pixels */
 #define NUM_PIXELS 25 /* Number of used pixels */
 #define FIRST_PIXEL 4 /* First used pixel */
 #define COLOR_MODE NEO_BRG
-#endif
 
 Adafruit_NeoPixel pixels(TOTAL_PIXELS, PIN, COLOR_MODE + NEO_KHZ800);
 
@@ -46,6 +38,9 @@ void loop() {
 void set_effect(char c) {
   effect_change = millis();
   switch (c) {
+    case 'c':
+      current_effect = clear;
+      break;
     case 'r':
       current_effect = red;
       break;
@@ -57,9 +52,6 @@ void set_effect(char c) {
       break;
     case 'w':
       current_effect = white;
-      break;
-    case 'c':
-      current_effect = clear;
       break;
     case 'R':
       current_effect = rainbow;
@@ -82,19 +74,19 @@ void update_effect() {
 
   switch (current_effect) {
     case red:
-      pixels.setBrightness(255);
+      pixels.setBrightness(MAX_BRIGHTNESS);
       set_all_pixels(pixels.Color(255, 0, 0));
       break;
     case green:
-      pixels.setBrightness(255);
+      pixels.setBrightness(MAX_BRIGHTNESS);
       set_all_pixels(pixels.Color(0, 255, 0));
       break;
     case blue:
-      pixels.setBrightness(255);
+      pixels.setBrightness(MAX_BRIGHTNESS);
       set_all_pixels(pixels.Color(0, 0, 255));
       break;
     case white:
-      pixels.setBrightness(255);
+      pixels.setBrightness(MAX_BRIGHTNESS);
       set_all_pixels(pixels.Color(255, 255, 255));
       break;
     case clear:
@@ -114,35 +106,40 @@ void update_effect() {
 }
 
 void set_all_pixels(uint32_t color) {
+  pixels.clear();
   for (int i = 0; i < NUM_PIXELS; i++) {
     pixels.setPixelColor(FIRST_PIXEL + i, color);
   }
 }
 
 void update_rainbow(unsigned long since_effect_change) {
-  uint16_t phase = since_effect_change * NUM_PIXELS * 3 % 65536;
-  pixels.setBrightness(255);
-  for (uint32_t i = 0; i < NUM_PIXELS; i++) {
-    uint16_t hue = ((i * 65536 / NUM_PIXELS) - phase) % 65536;
+  const int speed = 3;
+  uint16_t phase = since_effect_change * speed % 65536; // Where in the loop to start
+  pixels.setBrightness(MAX_BRIGHTNESS);
+  for (uint16_t i = 0; i < NUM_PIXELS; i++) {
+    uint16_t hue = (((uint32_t)i * 65536 / NUM_PIXELS) - phase * NUM_PIXELS) % 65536;
     pixels.setPixelColor(FIRST_PIXEL + i, pixels.ColorHSV(hue));
   }
 }
 
 void update_flash(unsigned long since_effect_change) {
-  unsigned int secs = (since_effect_change / 500);
-  uint8_t brightness = (secs % 2) * 255;
-  pixels.setBrightness(brightness);
+  const int speed = 1; // Flashes per second
+  uint8_t brightness = ((since_effect_change * speed / 500) % 2); // 0 or 1
+  pixels.setBrightness(brightness * MAX_BRIGHTNESS);
   set_all_pixels(pixels.Color(255, 0, 0));
 }
 
 void update_loading(unsigned long since_effect_change) {
   const int speed = 50;
-  const int length = NUM_PIXELS / 2;
-  uint16_t phase = since_effect_change * speed % 65536;
+  uint16_t phase = since_effect_change * speed % 65536; // Where in the loop to start
   uint16_t position = (uint32_t)phase * NUM_PIXELS / 65535;
-  pixels.setBrightness(255);
+  const int length = NUM_PIXELS / 2; // Number of pixels used for the 'snake'
+  pixels.setBrightness(MAX_BRIGHTNESS);
   pixels.clear();
   for (int i = 0; i < length; i++) {
-    pixels.setPixelColor(FIRST_PIXEL + ((position + i) % NUM_PIXELS), pixels.ColorHSV(10923, 255, pixels.gamma8(i * (255 / (length)))));
+    // Set pixels to yellow with varying intensities
+    pixels.setPixelColor(FIRST_PIXEL + ((position + i) % NUM_PIXELS),
+                         pixels.ColorHSV(10923, 255,
+                                         pixels.gamma8(i * (255 / (length)))));
   }
 }
