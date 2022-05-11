@@ -1,10 +1,12 @@
 from ImageAnalyzer import ImageAnalyzer
-
-import MotionDetector
-
-import cv2 as cv
-
 from ScoreEvaluator import ScoreEvaluator
+from GameMode import GameMode301
+from GUI import Game_GUI
+
+from Requester import Requester
+import MotionDetector
+import threading
+import time
 
 class Dart:
     '''
@@ -12,10 +14,28 @@ class Dart:
     '''
 
     def __init__(self):
-        self.detector = MotionDetector.MotionDetector()
-        # self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
-        #cv.imshow("pic nice", self.reference)
-        #cv.waitKey(0)
+        self.detector       = MotionDetector.MotionDetector()
+
+        self.game_mode      = GameMode301()
+        self.GUI            = Game_GUI()
+
+    def start(self):
+        self.GUI.show_start_screen(self.choose_player_amount)
+    
+    def choose_player_amount(self):
+        self.GUI.choose_player_amount(lambda x: self.create_game(x))
+
+    def create_game(self, player_count):
+
+        #number_of_players = self.GUI.choose_player_amount()
+        #self.game_mode.start_game(number_of_players)
+
+        print("Player_count", player_count)
+        self.game_mode.start_game(player_count)
+
+        t = threading.Thread(target=self.game)
+        t.start()
+        self.GUI.show_game_screen()
 
     def wait(self):
         frames_before, frames_after = self.detector.wait_for_motion()
@@ -47,3 +67,24 @@ class Dart:
 
         # Set new background
         self.frames_before = frames_after
+
+
+    def game(self):
+        self.GUI.show_game_screen()
+        self.detector.open_cameras()
+        self.GUI.show_waiting_screen()
+
+        time.sleep(3)
+        self.wait()
+
+        score = self.get_score()
+
+        self.GUI.show_score(score)
+
+
+dart = Dart()
+dart.start()
+
+
+
+

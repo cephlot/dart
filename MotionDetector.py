@@ -7,9 +7,9 @@ from CameraSetup import cameraSetup
 class MotionDetector:
     def __init__(self):
         bannedCam = cameraSetup.checkOS()
+        #bannedCam = 2
         self.camera_indices = cameraSetup.getCams(bannedCam)
-        self.open_cameras()
-        cameraSetup.stabilize(self.camera_indices, self.caps)
+        #self.open_cameras()
         print("Waiting for motion...")
         
         """
@@ -39,7 +39,8 @@ class MotionDetector:
         self.caps = [None] * len(self.camera_indices)
         for i in range(len(self.caps)):
             self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
-        
+        cameraSetup.stabilize(self.camera_indices, self.caps)
+
         """
         # self.caps = [None] * len(self.camera_indices)
         # for i in range(len(self.caps)):
