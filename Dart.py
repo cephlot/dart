@@ -14,7 +14,7 @@ class Dart:
     def __init__(self):
         self.detector = MotionDetector.MotionDetector()
 
-    def wait(self):
+    def wait(self, first_dart):
         """Wrapper for MotionDetector.wait_for_motion. Stores frames before and 
         frames after.
         """
@@ -22,6 +22,9 @@ class Dart:
         frames_before, frames_after = self.detector.wait_for_motion()
         self.frames_before = frames_before
         self.frames_after = frames_after
+
+        if(first_dart):
+            self.frames_before_before = frames_before
 
     def get_score(self):
         """Gets the score from a dart by using evaluator.
@@ -44,6 +47,7 @@ class Dart:
 
         while condition is False:
             frames_before, frames_after = self.detector.wait_for_motion()
-            condition = ImageAnalyzer.analyze(self.frames_before, frames_after)
+            
+            condition = ImageAnalyzer.analyze(self.frames_before_before, frames_after)
 
         self.frames_before = frames_after
