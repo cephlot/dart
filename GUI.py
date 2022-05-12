@@ -23,9 +23,6 @@ class Game_GUI(object):
         for i in range(self.max_player_count):
             self.player_amount_button[i].pack_forget()
 
-        for i in range(3):
-            self.player_amount_button[i].pack_forget()
-
         self.score.config(anchor=CENTER) #Show game screen
         self.score.config(text='Welcome to dart!', bg='white')
         self.score.pack(fill=BOTH, expand=1)
