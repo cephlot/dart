@@ -67,7 +67,7 @@ class ScoreEvaluator:
         :return: score 
         :rtype: int
         """
-        
+
         score = 0
         try:
             score = self.board_mask[round(coordinate[1])][round(coordinate[0])]
@@ -219,7 +219,7 @@ class ScoreEvaluator:
             if(c[0] < 1 or c[1] < 1):
                 coordinatesCopy.remove(c)
                 print(f"check_negative_projection -- ERROR -- Projected coordinate for dart out of bounce {c}")
-            if(c[0] > self.reference.shape[0] or c[1] > self.reference.shape[1]):
+            elif(c[0] > self.reference.shape[0] or c[1] > self.reference.shape[1]):
                 print(f"check_negative_projection -- ERROR -- Projected coordinate for dart out of bounce {c}")
                 coordinatesCopy.remove(c)
         return coordinatesCopy
