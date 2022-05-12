@@ -106,9 +106,6 @@ class DartLocalization:
 
         diff_img = cv2.subtract(threshold, diff_img)
 
-        cv2.imshow("threshold", threshold)
-        cv2.imshow("diff", diff_img)
-
         contours, hierarchy = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
             return -1,-1
