@@ -87,7 +87,6 @@ class ImageNormalizer:
         ret = cv2.add(img_red, normal_brightness)
         return ret
 
-
     @staticmethod
     def white_balance(img):
         # https://stackoverflow.com/questions/46390779/automatic-white-balancing-with-grayworld-assumption
@@ -98,6 +97,21 @@ class ImageNormalizer:
         result[:, :, 2] = result[:, :, 2] - ((avg_b - 128) * (result[:, :, 0] / 255.0) * 1.3)
         result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
         return result
+
+    @staticmethod
+    def clahe_EQ(img):
+
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        h,s,v = cv2.split(hsv)
+
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        result = clahe.apply(v)
+
+        hsv = cv2.merge((h,s,result))
+        res = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        return res
+
 
     @staticmethod
     def normalize_brightness(img):
