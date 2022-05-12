@@ -5,38 +5,41 @@ from ImageNormalizer import ImageNormalizer
 class DartLocalization:
 
     def img2gray(img):
-        """_summary_
+        """Takes in an image as an input and converts it into a
+        grayscaled image
 
-        :param img: _description_
-        :type img: _type_
-        :return: _description_
-        :rtype: _type_
+        :param img: input RGB image
+        :type img: image
+        :return: grayscaled image
+        :rtype: image
         """        
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return img_gray
     
     def getDiff(clean_plate, new_img):
-        """_summary_
+        """Creates an image that is the difference between a image with and
+        without the dart
 
-        :param clean_plate: _description_
-        :type clean_plate: _type_
-        :param new_img: _description_
-        :type new_img: _type_
-        :return: _description_
-        :rtype: _type_
+        :param clean_plate: image without the dart in RGB
+        :type clean_plate: image
+        :param new_img:  image with the dart in RGB
+        :type new_img: image
+        :return: difference image
+        :rtype: image
         """        
         diff = cv2.absdiff(clean_plate, new_img)
         return diff
 
     def thresholding(clean_plate, new_img):
-        """_summary_
+        """Doing thresholding on the image to isolate only the dart
+        from the image
 
-        :param clean_plate: _description_
-        :type clean_plate: _type_
-        :param new_img: _description_
-        :type new_img: _type_
-        :return: _description_
-        :rtype: _type_
+        :param clean_plate: image without the dart in RGB
+        :type clean_plate: image
+        :param new_img: image with the dart in RGB
+        :type new_img: image
+        :return: thresholded image
+        :rtype: binary image
         """        
         diff_img = DartLocalization.getDiff(new_img, clean_plate)
         diff_img = DartLocalization.img2gray(diff_img)
@@ -46,12 +49,12 @@ class DartLocalization:
         return diff_img, img_thresh
     
     def thresholding_from_diff(diff):
-        """_summary_
+        """Gets the threshold from the diff image
 
-        :param diff: _description_
-        :type diff: _type_
-        :return: _description_
-        :rtype: _type_
+        :param diff: image of the difference between the image with and without the dart
+        :type diff: image
+        :return: threshold image
+        :rtype: binary image
         """        
         img_blur = cv2.GaussianBlur(diff, (3,3), 0)
         img_blur = cv2.bilateralFilter(img_blur, 5, 20, 20)
@@ -60,12 +63,12 @@ class DartLocalization:
         return img_threshold
 
     def erode_dilate(image_thresh):
-        """_summary_
+        """performs erode, dilate, open and close to get a more clean segmentation/threshold
 
-        :param image_thresh: _description_
-        :type image_thresh: _type_
-        :return: _description_
-        :rtype: _type_
+        :param image_thresh: thresholded image
+        :type image_thresh: binary image
+        :return: improved thresholded image
+        :rtype: binary image
         """        
         small_kernel = np.ones((5,5), np.int8)
         smaller_kernel = np.ones((3,3), np.int8)
@@ -80,17 +83,19 @@ class DartLocalization:
         return image_thresh
 
     def getContour(img, diff_img, boarder_limit):
-        """_summary_
+        """Gets a list of the contours (blobs of pixels) and stores them from lagest to smallest.
+        The dart should be the largest and therefore be the shape that we subtract to only get the dart in the threshold
+        Performs a contour check again on the new subtracted diff image for a cleaner result
 
-        :param img: _description_
-        :type img: _type_
-        :param diff_img: _description_
-        :type diff_img: _type_
-        :param boarder_limit: _description_
-        :type boarder_limit: _type_
-        :raises RuntimeError: _description_
-        :return: _description_
-        :rtype: _type_
+        :param img: input image
+        :type img: image
+        :param diff_img: image of the difference between the image with and without the dart
+        :type diff_img: image
+        :param boarder_limit: number of pixels from the boarder
+        :type boarder_limit: int
+        :raises RuntimeError: Error if no contours are found
+        :return: coordinates for the dart point on the picture in pixel grid
+        :rtype: int, int
         """        
         threshold = img
         contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -120,12 +125,12 @@ class DartLocalization:
         return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, op_x=op_x, op_y=op_y, boarder_limit=boarder_limit)
     
     def calculateCenterOfPixelMass(dart_mask):
-        """_summary_
+        """Calculates the center of mass on the binary image
 
-        :param dart_mask: _description_
-        :type dart_mask: _type_
-        :return: _description_
-        :rtype: _type_
+        :param dart_mask: mask of the dart
+        :type dart_mask: binary image
+        :return: the coordinates of the center of mass in pixel grid
+        :rtype: int, int
         """        
         # calculate center of mass of dart pixels in binary image
         m = cv2.moments(dart_mask)
@@ -135,16 +140,16 @@ class DartLocalization:
         return center_of_mass_x, center_of_mass_y
 
     def getPointPosition(dart_mask ,center_of_mass_x, center_of_mass_y):
-        """_summary_
+        """get the coordinates of the point of the dart by calculating which point is furthest from the center of mass
 
-        :param dart_mask: _description_
-        :type dart_mask: _type_
-        :param center_of_mass_x: _description_
-        :type center_of_mass_x: _type_
-        :param center_of_mass_y: _description_
-        :type center_of_mass_y: _type_
-        :return: _description_
-        :rtype: _type_
+        :param dart_mask: mask of the dart
+        :type dart_mask: binary image
+        :param center_of_mass_x: the center of mass in x coordinates
+        :type center_of_mass_x: int
+        :param center_of_mass_y: the center of mass in y coordinates
+        :type center_of_mass_y: int
+        :return: returns the predicted point of the dart as well as the opposite point of the dart.
+        :rtype: int, int, int, int
         """        
         # Find pixel furthest away from center of mass (this should be the point of the dart)
         nonzero = cv2.findNonZero(dart_mask)
@@ -163,22 +168,22 @@ class DartLocalization:
         return max_x, max_y, op_x, op_y
 
     def dartPointCorrection(dart_mask, max_x, max_y, op_x, op_y, boarder_limit):
-        """_summary_
+        """Corrects the dart tips position in case the tip is predicted to be on the boarder of the frame
 
-        :param dart_mask: _description_
-        :type dart_mask: _type_
-        :param max_x: _description_
-        :type max_x: _type_
-        :param max_y: _description_
-        :type max_y: _type_
-        :param op_x: _description_
-        :type op_x: _type_
-        :param op_y: _description_
-        :type op_y: _type_
-        :param boarder_limit: _description_
-        :type boarder_limit: _type_
-        :return: _description_
-        :rtype: _type_
+        :param dart_mask: a mask of the dart
+        :type dart_mask: binary image
+        :param max_x: predicted x coordinates of the dart point
+        :type max_x: int
+        :param max_y: predicted y coordinates of the dart point
+        :type max_y: int
+        :param op_x: opposite x coordinates of the dart point
+        :type op_x: int
+        :param op_y: opposite y coordinates of the dart point
+        :type op_y: int
+        :param boarder_limit: number of pixels from the boarder
+        :type boarder_limit: int
+        :return: the coordinates of the dart point corrected
+        :rtype: int, int
         """        
 
         if max_y > dart_mask.shape[0] - boarder_limit or max_y < boarder_limit or max_x > dart_mask.shape[1] - boarder_limit or max_x < boarder_limit:
@@ -188,6 +193,21 @@ class DartLocalization:
         return max_x, max_y
 
     def printDebug(dart_mask, max_x, max_y, op_x, op_y, board_limiter):
+        """Debug print method
+
+        :param dart_mask: mask of the dart
+        :type dart_mask: binary image
+        :param max_x: predicted x coordinates of the dart point
+        :type max_x: int
+        :param max_y: predicted y coordinates of the dart point
+        :type max_y: int
+        :param op_x: opposite x coordinates of the dart point
+        :type op_x: int
+        :param op_y: opposite y coordinates of the dart point
+        :type op_y: int
+        :param board_limiter: number of pixels from the boarder
+        :type board_limiter: int
+        """        
         print("image size:", dart_mask.shape[0], dart_mask.shape[1])
         print("estimated point:",max_x, max_y)
         print("opposite point:",op_x, op_y)
@@ -195,14 +215,14 @@ class DartLocalization:
 
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
-        """_summary_
+        """Finds the darts position on the board
 
-        :param image_without_dart: _description_
-        :type image_without_dart: _type_
-        :param image_with_dart: _description_
-        :type image_with_dart: _type_
-        :return: _description_
-        :rtype: _type_
+        :param image_without_dart: clean image without the dart
+        :type image_without_dart: image
+        :param image_with_dart: image with the dart
+        :type image_with_dart: image
+        :return: coordinates for the darts position
+        :rtype: int, int
         """        
 
         image_with_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_with_dart))
