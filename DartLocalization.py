@@ -3,6 +3,7 @@ import numpy as np
 from ImageNormalizer import ImageNormalizer
 
 class DartLocalization:
+<<<<<<< HEAD
 
     def img2gray(img):
         """Takes in an image as an input and converts it into a
@@ -33,6 +34,52 @@ class DartLocalization:
     def thresholding(clean_plate, new_img):
         """Doing thresholding on the image to isolate only the dart
         from the image
+=======
+    @staticmethod
+    def find_dart_point(image_without_dart, image_with_dart):
+        # denoised_image_without_dart = cv2.bilateralFilter(image_without_dart, d=5, sigmaColor=30, sigmaSpace=20)
+        # denoised_image_with_dart = cv2.bilateralFilter(image_with_dart, d=5, sigmaColor=30, sigmaSpace=20)
+        denoised_image_without_dart = cv2.GaussianBlur(image_without_dart, ksize=(5,5), sigmaX=0.0)
+        denoised_image_with_dart = cv2.GaussianBlur(image_with_dart, ksize=(5,5), sigmaX=0.0)
+
+        image_color_diff = cv2.absdiff(src1=denoised_image_without_dart, src2=denoised_image_with_dart)
+        # cv2.imshow("Frame difference", image_color_diff)
+        image_gray_diff = cv2.cvtColor(image_color_diff, cv2.COLOR_BGR2GRAY)
+
+        image_thresh = cv2.threshold(src=image_gray_diff, thresh=15, maxval=255, type=cv2.THRESH_BINARY)[1]
+        # cv2.imshow("Threshold", image_thresh)
+
+        small_kernel = np.ones((5,5), np.uint8)
+        big_kernel = np.ones((9,9), np.uint8)
+        image_thresh = cv2.erode(image_thresh, small_kernel, iterations=1)
+        image_thresh = cv2.dilate(image_thresh, big_kernel, iterations=1)
+        image_thresh = cv2.erode(image_thresh, small_kernel, iterations=1)
+        image_thresh = cv2.dilate(image_thresh, big_kernel, iterations=1)
+        # cv2.imshow("Dilate erode", image_thresh)
+
+        image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_OPEN, kernel=(5,5), iterations=1)
+
+        dart_mask = image_thresh
+        # cv2.imshow("dart mask", dart_mask)
+
+        contours, hierarchy = cv2.findContours(dart_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if len(contours) == 0:
+            raise RuntimeError("No contours")
+
+        c = max(contours, key = cv2.contourArea)
+
+        # x,y,w,h = cv2.boundingRect(c)
+        # dart_mask_contour = cv2.cvtColor(dart_mask.copy(), cv2.COLOR_GRAY2BGR)
+        # draw the biggest contour (c) in green
+        # cv2.rectangle(dart_mask_contour,(x,y),(x+w,y+h),(0,255,0),2)
+        # cv2.imshow("Contour", dart_mask_contour)
+
+        # Subtract everything outside contour
+        contour_mask = np.zeros((dart_mask.shape[0],dart_mask.shape[1],1), np.uint8)
+        contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
+        dart_mask = cv2.subtract(dart_mask, cv2.bitwise_not(contour_mask))
+        # cv2.imshow("Dart mask subtract", dart_mask)
+>>>>>>> dev
 
         :param clean_plate: image without the dart in RGB
         :type clean_plate: image
@@ -137,6 +184,7 @@ class DartLocalization:
         center_of_mass_x = m["m10"] / m["m00"]
         center_of_mass_y = m["m01"] / m["m00"]
 
+<<<<<<< HEAD
         return center_of_mass_x, center_of_mass_y
 
     def getPointPosition(dart_mask ,center_of_mass_x, center_of_mass_y):
@@ -151,6 +199,12 @@ class DartLocalization:
         :return: returns the predicted point of the dart as well as the opposite point of the dart.
         :rtype: int, int, int, int
         """        
+=======
+        # dart_mask_copy = dart_mask.copy()
+        # cv2.circle(dart_mask_copy, (int(center_of_mass_x), int(center_of_mass_y)), 10, 128, 2)
+        # cv2.imshow("Center of mass", dart_mask_copy)
+
+>>>>>>> dev
         # Find pixel furthest away from center of mass (this should be the point of the dart)
         nonzero = cv2.findNonZero(dart_mask)
         distances = np.sqrt((nonzero[:,:,0] - center_of_mass_x) ** 2 + (nonzero[:,:,1] - center_of_mass_y) ** 2)
