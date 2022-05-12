@@ -111,14 +111,14 @@ class DartLocalization:
 
         contours, hierarchy = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
-            raise RuntimeError("No contours")
+            return -1,-1
+
         c = max(contours, key = cv2.contourArea)
 
         # Subtract everything outside contour
         contour_mask = np.zeros((diff_img.shape[0],diff_img.shape[1],1), np.uint8)
         contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
         dart_mask = cv2.subtract(threshold, cv2.bitwise_not(contour_mask))
-        cv2.imshow("Dart mask subtract", dart_mask)
 
         center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=dart_mask)
         max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=dart_mask, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
