@@ -15,26 +15,28 @@ class ScoreEvaluator:
     Will use CoordinateProjector and DartLocalization to achive this.
     """
 
-    def __init__(self, image_B_frames):
+    def __init__(self):
         self.reference = cv.imread('images/pic_nice.jpg', cv.IMREAD_GRAYSCALE)
         self.board_mask = cv.imread('images/board_mask.png', cv.IMREAD_GRAYSCALE)
-        self.projectors = self.create_projectors(image_B_frames)
         self.DISTANCE_FACTOR = 1.1
         self.PIXEL_FACTOR = 10
+        self.projectors = []
 
     "TODO: Make evaluate only generate new transformation matrix when new player by taking boolean parameter"
-    def evaluate(self, image_B_frames, image_I_frames):
+    def evaluate(self, image_B_frames, image_I_frames, b_create_matrix):
         """Uses the RegionSegmenter and dart localizer to score
         :param image_B_frames: images from all cameras before dart is thrown
         :type image_B_frames: list
         :param image_I_frames: images from all cameras after dart is thrown
         :type image_I_frames: list
+        :param b_create_matrix: boolean create matrix
+        :type b_create_matrix: bool
+
         :return: 0 if all transformations are bad
         :rtype: int
         """
-        
-        if(self.error_check_image_length(image_B_frames, image_I_frames)):
-            return 0
+        self.create_projectors_check(image_B_frames, b_create_matrix)
+        if(self.error_check_image_length(image_B_frames, image_I_frames)):  return 0
         coordinate_list         =  self.get_dart_coordinates(image_B_frames, image_I_frames)
         coordinate_list         =  self.check_if_no_dart(coordinate_list)
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
@@ -44,6 +46,7 @@ class ScoreEvaluator:
         proj_coordinate_list    =  self.quality_control_projected_coordinates(proj_coordinate_list)
         average_coordinate      =  self.average_coordinates(proj_coordinate_list)
         if(average_coordinate is None):
+            print("evaluate -- ERROR -- could not create average coordinate, returning 0")
             return 0
         """ 
         image_ref = cv.imread('images\pic_nice.jpg')
@@ -107,6 +110,23 @@ class ScoreEvaluator:
                 pc = PredictedCoordinate(x,y,i)
                 coordinate_list.append(pc)
         return coordinate_list
+
+
+    def create_projectors_check(self, image_B_frames, b_create_matrix):
+        """check if the class must create projections matrices or not.
+        Will create matrix if b_create_matrix is true or if no matrix already exists
+
+        :param image_B_frames: before frames for projection matrix
+        :type image_B_frames: list of images
+        :param b_create_matrix: true if the program should create new matrix
+        :type b_create_matrix: bool
+        """        
+        if(b_create_matrix):
+            self.projectors = self.create_projectors(image_B_frames)
+        elif(len(self.projectors) == 0):
+            print("create_projectors_check -- ERROR -- called with b_create_matrix = false and no pre-constructed matrises for projections!")
+            print("Will create matrix anyways")
+            self.projectors = self.create_projectors(image_B_frames)
 
     def create_projectors(self, image_B_frames):
         """Creates projectors and their projection matrix for all cameras 
