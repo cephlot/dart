@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 
-class CoordinateProjector:
+class CoordinateProjector:    
     '''
     Class for projecting dart coordinates from camera image
     onto a statis point mask image in order to get the points.
@@ -16,7 +16,7 @@ class CoordinateProjector:
             print("Reference image is None on init for CoordinateProjector.")
         self.img_ref = image_reference
         self.matrix = None
-        self.MIN_MATCH_COUNT = 5
+        self.MIN_MATCH_COUNT = 35
 
     def set_img_ref(self, image_reference):
         """Sets image reference
@@ -118,7 +118,7 @@ class CoordinateProjector:
         c = cv.perspectiveTransform(c, self.matrix)
         return (int(c[0][0][0]), int(c[0][0][1]))
 
-    def hasMatrix(self):
+    def hasMatrix(self):        
         if(self.matrix is None):
             return False
         return True
