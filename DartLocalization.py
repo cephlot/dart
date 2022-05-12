@@ -1,4 +1,5 @@
 import cv2
+from cv2 import imshow
 import numpy as np
 from ImageNormalizer import ImageNormalizer
 
@@ -82,7 +83,7 @@ class DartLocalization:
         image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_OPEN, kernel=(3,3), iterations=2)
         return image_thresh
 
-    def getContour(img, diff_img, boarder_limit):
+    def getContour(img, diff_img, boarder_limit, clean):
         """Gets a list of the contours (blobs of pixels) and stores them from lagest to smallest.
         The dart should be the largest and therefore be the shape that we subtract to only get the dart in the threshold
         Performs a contour check again on the new subtracted diff image for a cleaner result
@@ -119,6 +120,9 @@ class DartLocalization:
 
         center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=dart_mask)
         max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=dart_mask, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
+
+        DartLocalization.printDebug(dart_mask, max_x, max_y, op_x, op_y, boarder_limit, clean)
+
         return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, op_x=op_x, op_y=op_y, boarder_limit=boarder_limit)
     
     def calculateCenterOfPixelMass(dart_mask):
@@ -189,7 +193,7 @@ class DartLocalization:
         
         return max_x, max_y
 
-    def printDebug(dart_mask, max_x, max_y, op_x, op_y, board_limiter):
+    def printDebug(dart_mask, max_x, max_y, op_x, op_y, board_limiter, image):
         """Debug print method
 
         :param dart_mask: mask of the dart
@@ -205,10 +209,17 @@ class DartLocalization:
         :param board_limiter: number of pixels from the boarder
         :type board_limiter: int
         """        
-        print("image size:", dart_mask.shape[0], dart_mask.shape[1])
+        print("dartMask size:", dart_mask.shape[0], dart_mask.shape[1])
+        print("image size:", image.shape[0], image.shape[1])
         print("estimated point:",max_x, max_y)
         print("opposite point:",op_x, op_y)
         print("boarder limit", board_limiter)
+
+        image = cv2.circle(image, (int(max_x), int(max_y)), radius=10, color=(0,255,0), thickness=2)
+        image = cv2.circle(image, (int(op_x), int(op_y)), radius=10, color=(0,255,0), thickness=2)
+        
+        cv2.imshow("mask", dart_mask)
+        cv2.imshow("img", image)
 
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
@@ -224,8 +235,11 @@ class DartLocalization:
 
         image_with_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_with_dart))
         image_without_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_without_dart))
+        
+        image_with_dart = cv2.resize(image_with_dart, (1280,720), interpolation=cv2.INTER_AREA)
+        image_without_dart = cv2.resize(image_without_dart, (1280,720), interpolation=cv2.INTER_AREA)
 
         diff_img, threshold = DartLocalization.thresholding(image_without_dart, image_with_dart)
         threshold = DartLocalization.erode_dilate(threshold)
 
-        return DartLocalization.getContour(threshold, diff_img, 5)
+        return DartLocalization.getContour(threshold, diff_img, 5, image_with_dart)
