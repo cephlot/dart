@@ -19,25 +19,37 @@ html
     padding: 30px;
     color: #2CB3C9;
     }
+    .current-player {
+    color: green;
+    }
+
   body
     script(src="/socket.io/socket.io.js")
     script.
       var socket = io();
 
-      socket.on('connect', function() {
+      socket.on('connect', function(player_count) {
         console.log("connected");
       });
 
       socket.on('data', function(data) {
-        document.getElementById(1).getElementsByTagName('div')[0].innerHTML = data['p1_score'];
-        document.getElementById(2).getElementsByTagName('div')[0].innerHTML = data['p2_score'];
+        
+
+        scores = data['player_scores']
+        //console.log(scores)
+
+        for (var i = 0; i < scores.length; i++) {
+          document.getElementById(i).innerHTML = scores[i];
+        }
+
+        //document.getElementById(1).getElementsByTagName('div')[0].innerHTML = data['p1_score'];
+        //document.getElementById(2).getElementsByTagName('div')[0].innerHTML = data['p2_score'];
       });
-  .score-board
-    #1.player
-      h4 Player 1
-      .score-box
-        | #{p1_score}
-    #2.player
-      h4 Player 2
-      .score-box
-        | #{p2_score}
+    
+    .score-board
+      - var player_count = player_scores.length
+      - for (var x = 0; x < player_count; x++)
+          .player
+            h4 Player #{x}
+            .score-box
+              div(id=x) #{player_scores[x]}
