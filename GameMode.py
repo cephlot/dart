@@ -52,6 +52,8 @@ class GameMode301(GameMode):
 		self.throw_count 	= 0
 		self.prev_score 	= 0
 
+		Requester.post_scores(self.scores, self.current_player)
+
 	def give_points(self, score):
 
 		if (self.game_status != GameStatus.ONGOING):
@@ -72,6 +74,8 @@ class GameMode301(GameMode):
 			print("lmao xd")
 			self.change_player()
 			self.game_status = GameStatus.GET_DARTS
+
+		Requester.post_scores(self.scores, self.current_player)
 
 	def change_player(self):
 		self.current_player = (self.current_player + 1) % self.player_count

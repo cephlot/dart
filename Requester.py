@@ -8,16 +8,14 @@ class Requester:
     """
 
     @staticmethod
-    def post_scores(p1, p2):
+    def post_scores(scores, current_player):
         """Post scores to the specified address
 
-        :param p1: player 1 score
-        :type p1: int
-        :param p2: player 2 score
-        :type p2: int
+        :param scores: list of player scores
+        :type scores: int list
         """
-        
-        requests.post(IP, json={"p1_score":p1,"p2_score":p2})
+        assert isinstance(current_player, int)
+        requests.post(IP, json={"player_scores": scores, "current_player": current_player})
 
     @staticmethod
     def delete_scores():
