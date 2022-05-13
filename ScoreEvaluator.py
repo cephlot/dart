@@ -53,8 +53,9 @@ class ScoreEvaluator:
         test = cv.circle(test, average_coordinate, 8, (0, 250, 0), 3)
         cv.imshow("yes", test)
         cv.waitKey(0) """
-        return self.score_coordinate(average_coordinate)
-
+        score = self.score_coordinate(average_coordinate)
+        print("score: ", score)
+        return score
 
     def score_coordinate(self, coordinate):
         """Scors the average dart coordinate using scoring mask
@@ -117,6 +118,7 @@ class ScoreEvaluator:
 
         projectors = []
         for i, image_b in enumerate(image_B_frames):
+            print("create_projectors, image_b shape", image_b.shape)
             projectors.append(CoordinateProjector(self.reference))
             image_B_gray = cv.cvtColor(image_b, cv.COLOR_BGR2GRAY)
             projectors[i].generate_matrix(image_B_gray)

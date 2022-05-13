@@ -2,6 +2,7 @@ from ImageAnalyzer import ImageAnalyzer
 from ScoreEvaluator import ScoreEvaluator
 from GameMode import GameMode301, GameStatus
 from GUI import Game_GUI
+import cv2 as cv
 
 from Requester import Requester
 import MotionDetector
@@ -39,6 +40,7 @@ class Dart:
         """
 
         frames_before, frames_after = self.detector.wait_for_motion()
+        #frames_before, frames_after = Dart.resize_images(frames_before, frames_after)
         self.frames_before = frames_before
         self.frames_after = frames_after
 
@@ -52,7 +54,7 @@ class Dart:
         :return: a score evaluation
         :rtype: int
         """        
-        print("BEFORE")
+        print("Number of frames")
         print(len(self.frames_before))
         evaluator = ScoreEvaluator(self.frames_before)
         return evaluator.evaluate(self.frames_before, self.frames_after)
@@ -102,6 +104,13 @@ class Dart:
 
         print("Game over!")
 
+
+    def resize_images(frames_before, frames_after):
+        
+        for i,_ in enumerate(frames_before):
+            frames_before[i] = cv.resize(frames_before[i], (1280,720))
+            frames_after[i] = cv.resize(frames_after[i], (1280,720))
+        return frames_before, frames_after
 
 if __name__ == '__main__':
     dart = Dart()
