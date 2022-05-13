@@ -99,7 +99,11 @@ class DartLocalization:
         :rtype: int, int
         """        
         threshold = img
+        #imshow("thresh before", threshold)
         contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        if len(contours) == 0:
+            print("ERROR getContour no contours")
+            return -1,-1
         cnts = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
 
         threshold = np.zeros(threshold.shape, np.uint8)
@@ -109,6 +113,7 @@ class DartLocalization:
 
         contours, hierarchy = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
+            print("ERROR getContour no contours")
             return -1,-1
 
         c = max(contours, key = cv2.contourArea)
@@ -116,12 +121,15 @@ class DartLocalization:
         # Subtract everything outside contour
         contour_mask = np.zeros((diff_img.shape[0],diff_img.shape[1],1), np.uint8)
         contour_mask = cv2.fillPoly(contour_mask, pts=[c], color=255)
+        #cv2.imshow("thresh", threshold)
+        #cv2.imshow("contour", contour_mask)
+
         dart_mask = cv2.subtract(threshold, cv2.bitwise_not(contour_mask))
 
         center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=dart_mask)
         max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=dart_mask, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
 
-        DartLocalization.printDebug(dart_mask, max_x, max_y, op_x, op_y, boarder_limit, clean)
+        #DartLocalization.printDebug(dart_mask, max_x, max_y, op_x, op_y, boarder_limit, clean)
 
         return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, op_x=op_x, op_y=op_y, boarder_limit=boarder_limit)
     
@@ -220,6 +228,7 @@ class DartLocalization:
         
         cv2.imshow("mask", dart_mask)
         cv2.imshow("img", image)
+        cv2.waitKey(0)
 
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
@@ -236,9 +245,6 @@ class DartLocalization:
         image_with_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_with_dart))
         image_without_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_without_dart))
         
-        image_with_dart = cv2.resize(image_with_dart, (1280,720), interpolation=cv2.INTER_AREA)
-        image_without_dart = cv2.resize(image_without_dart, (1280,720), interpolation=cv2.INTER_AREA)
-
         diff_img, threshold = DartLocalization.thresholding(image_without_dart, image_with_dart)
         threshold = DartLocalization.erode_dilate(threshold)
 
