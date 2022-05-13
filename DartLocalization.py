@@ -70,7 +70,15 @@ class DartLocalization:
         :type image_thresh: binary image
         :return: improved thresholded image
         :rtype: binary image
-        """        
+        """ 
+        big_kernel = np.ones((5,5), np.int8)
+        small_kernel = np.ones((3,3), np.int8)
+        image_thresh = cv2.erode(image_thresh, small_kernel, iterations=1)
+        image_thresh = cv2.dilate(image_thresh, big_kernel, iterations=1)
+        image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_CLOSE, kernel=(3,3), iterations=2)
+        return image_thresh
+
+        """       
         small_kernel = np.ones((5,5), np.int8)
         smaller_kernel = np.ones((3,3), np.int8)
         big_kernel = np.ones((9,9), np.int8)
@@ -82,6 +90,7 @@ class DartLocalization:
         image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_CLOSE, kernel=(3,3), iterations=2)
         image_thresh = cv2.morphologyEx(image_thresh, cv2.MORPH_OPEN, kernel=(3,3), iterations=2)
         return image_thresh
+        """
 
     def getContour(img, diff_img, boarder_limit, clean):
         """Gets a list of the contours (blobs of pixels) and stores them from lagest to smallest.
@@ -235,11 +244,15 @@ class DartLocalization:
 
         image_with_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_with_dart))
         image_without_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_without_dart))
-        
-        image_with_dart = cv2.resize(image_with_dart, (1280,720), interpolation=cv2.INTER_AREA)
-        image_without_dart = cv2.resize(image_without_dart, (1280,720), interpolation=cv2.INTER_AREA)
+
+        # image_with_dart = cv2.resize(image_with_dart, (640, 480), interpolation=cv2.INTER_AREA)
+        # image_without_dart = cv2.resize(image_without_dart, (640, 480), interpolation=cv2.INTER_AREA)
+
 
         diff_img, threshold = DartLocalization.thresholding(image_without_dart, image_with_dart)
+        cv2.imshow("threshold meme", threshold)
+        cv2.imshow("diff_img", diff_img)
         threshold = DartLocalization.erode_dilate(threshold)
+        cv2.imshow("threshold meme 2", threshold)
 
         return DartLocalization.getContour(threshold, diff_img, 5, image_with_dart)
