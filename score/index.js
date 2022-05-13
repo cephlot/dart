@@ -6,7 +6,7 @@ const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
 
-let obj = {player_scores: [301, 301, 201, 2], current_player: 2}
+let obj = {player_scores: [301, 301, 301, 301]}
 var clients = [];
 
 io.listen(server);

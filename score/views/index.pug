@@ -16,9 +16,19 @@ html
     }
     .score-box {
     border: 3px solid black;
+    border-radius: 5px;
     padding: 30px;
     color: #2CB3C9;
     }
+
+    .score-box-current {
+    border: 3px solid black;
+    border-radius: 5px;
+    padding: 30px;
+    background-color: #8aff8d;
+    color: #2CB3C9;
+    }
+
     .current-player {
     color: green;
     }
@@ -34,22 +44,34 @@ html
 
       socket.on('data', function(data) {
         
-
-        scores = data['player_scores']
-        //console.log(scores)
-
+        var scores = data['player_scores']        
         for (var i = 0; i < scores.length; i++) {
           document.getElementById(i).innerHTML = scores[i];
+
+          var classes = document.getElementById(i).classList
+          if (classes.contains('score-box-current')) {
+            classes.remove('score-box-current')
+            classes.add('score-box')
+          }
         }
 
-        //document.getElementById(1).getElementsByTagName('div')[0].innerHTML = data['p1_score'];
-        //document.getElementById(2).getElementsByTagName('div')[0].innerHTML = data['p2_score'];
+        var current_player = data['current_player']
+        var classes = document.getElementById(current_player).classList
+        classes.add('score-box-current')
+
       });
     
     .score-board
+      - var current_player = current_player
       - var player_count = player_scores.length
       - for (var x = 0; x < player_count; x++)
+        if (x == current_player)
           .player
             h4 Player #{x}
-            .score-box
-              div(id=x) #{player_scores[x]}
+            div(id=x).score-box-current
+              | #{player_scores[x]}
+        else 
+          .player
+            h4 Player #{x}
+            div(id=x).score-box
+              | #{player_scores[x]}
