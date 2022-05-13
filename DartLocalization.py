@@ -258,9 +258,9 @@ class DartLocalization:
 
 
         diff_img, threshold = DartLocalization.thresholding(image_without_dart, image_with_dart)
-        cv2.imshow("threshold meme", threshold)
-        cv2.imshow("diff_img", diff_img)
+        #cv2.imshow("threshold meme", threshold)
+        #cv2.imshow("diff_img", diff_img)
         threshold = DartLocalization.erode_dilate(threshold)
-        cv2.imshow("threshold meme 2", threshold)
+        #cv2.imshow("threshold meme 2", threshold)
 
         return DartLocalization.getContour(threshold, diff_img, 5, image_with_dart)
