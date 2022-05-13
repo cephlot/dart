@@ -1,4 +1,5 @@
 
+import copy
 from cv2 import imshow
 from CoordinateProjector import CoordinateProjector
 from DartLocalization import DartLocalization
@@ -190,14 +191,16 @@ class ScoreEvaluator:
         :rtype: list
         """
 
+        coordinatesCopy = copy.deepcopy(coordinates)
+        
         for c in coordinates:
             if(c[0] < 1 or c[1] < 1):
-                coordinates.remove(c)
+                coordinatesCopy.remove(c)
                 print(f"check_negative_projection -- ERROR -- Projected coordinate for dart out of bounce {c}")
             if(c[0] > self.reference.shape[0] or c[1] > self.reference.shape[1]):
                 print(f"check_negative_projection -- ERROR -- Projected coordinate for dart out of bounce {c}")
-                coordinates.remove(c)
-        return coordinates
+                coordinatesCopy.remove(c)
+        return coordinatesCopy
 
     def average_coordinates(self, coordinates):
         """Calculates the average coordinates
