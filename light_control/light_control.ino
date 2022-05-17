@@ -3,12 +3,10 @@
 #define PIN 6
 #define MAX_BRIGHTNESS 255
 
-#define TOTAL_PIXELS 50 /* Total number of connected pixels */
-#define NUM_PIXELS 25 /* Number of used pixels */
-#define FIRST_PIXEL 4 /* First used pixel */
+#define NUM_PIXELS 24 /* Number of used pixels */
 #define COLOR_MODE NEO_BRG
 
-Adafruit_NeoPixel pixels(TOTAL_PIXELS, PIN, COLOR_MODE + NEO_KHZ800);
+Adafruit_NeoPixel pixels(NUM_PIXELS, PIN, COLOR_MODE + NEO_KHZ800);
 
 // The available effects
 enum effect {clear, red, green, blue, white, rainbow, flash, loading};
@@ -108,7 +106,7 @@ void update_effect() {
 void set_all_pixels(uint32_t color) {
   pixels.clear();
   for (int i = 0; i < NUM_PIXELS; i++) {
-    pixels.setPixelColor(FIRST_PIXEL + i, color);
+    pixels.setPixelColor(i, color);
   }
 }
 
@@ -118,7 +116,7 @@ void update_rainbow(unsigned long since_effect_change) {
   pixels.setBrightness(MAX_BRIGHTNESS);
   for (uint16_t i = 0; i < NUM_PIXELS; i++) {
     uint16_t hue = (((uint32_t)i * 65536 / NUM_PIXELS) - phase * NUM_PIXELS) % 65536;
-    pixels.setPixelColor(FIRST_PIXEL + i, pixels.ColorHSV(hue));
+    pixels.setPixelColor(i, pixels.ColorHSV(hue));
   }
 }
 
@@ -138,7 +136,7 @@ void update_loading(unsigned long since_effect_change) {
   pixels.clear();
   for (int i = 0; i < length; i++) {
     // Set pixels to yellow with varying intensities
-    pixels.setPixelColor(FIRST_PIXEL + ((position + i) % NUM_PIXELS),
+    pixels.setPixelColor((position + i) % NUM_PIXELS,
                          pixels.ColorHSV(10923, 255,
                                          pixels.gamma8(i * (255 / (length)))));
   }

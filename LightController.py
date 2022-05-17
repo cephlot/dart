@@ -2,8 +2,8 @@ import time
 from serial import Serial
 
 class LightController:
-    def __init__(self):
-        self.ser = Serial(port='COM5', baudrate=115200)
+    def __init__(self, port):
+        self.ser = Serial(port, baudrate=115200)
         time.sleep(2)
         self.clear()
 
