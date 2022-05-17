@@ -4,6 +4,7 @@ from serial import Serial
 class LightController:
     def __init__(self, port):
         self.ser = Serial(port, baudrate=115200)
+        # Arduino resets when serial port opens. Wait for it to initialize.
         time.sleep(2)
         self.clear()
 
