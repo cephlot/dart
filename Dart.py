@@ -15,9 +15,13 @@ class Dart:
 
     def __init__(self):
         self.detector       = MotionDetector.MotionDetector()
+        self.evaluator      = None
 
         self.game_mode      = GameMode301()
         self.GUI            = Game_GUI()
+        self.frames_before  = None
+        self.frames_before_before  = None
+        self.frames_after   = None
 
     def start(self):
         self.GUI.show_start_screen(self.choose_player_amount)
@@ -51,11 +55,8 @@ class Dart:
 
         :return: a score evaluation
         :rtype: int
-        """        
-        print("BEFORE")
-        print(len(self.frames_before))
-        evaluator = ScoreEvaluator(self.frames_before)
-        return evaluator.evaluate(self.frames_before, self.frames_after)
+        """
+        return self.evaluator.evaluate(self.frames_before, self.frames_after)
 
     def wait_detect(self):
         """Waits for motion to be detected and then determines if there's a change 
@@ -72,36 +73,45 @@ class Dart:
         self.frames_before = frames_after
 
 
-    def game(self):
+    def create_new_matrix(self):
+        """wrapper for create_projection_matrix, will generate a new ScoreEvaluator if needed
+        """        
+        if(self.evaluator == None):
+            self.evaluator = ScoreEvaluator()
+        self.evaluator.create_projection_matrix(self.frames_before)
+
+    def initialize_GUI(self):
         self.GUI.show_game_screen()
         self.detector.open_cameras()
         self.GUI.show_waiting_screen()
 
-        time.sleep(1)
 
-        self.wait(True)
-        score = int(self.get_score())
-        self.GUI.show_score(score)
-        self.game_mode.give_points(score)
-        time.sleep(2)
-        self.GUI.show_waiting_screen()
+    def game(self):
+        self.initialize_GUI()
+        first_dart = True
 
         while(self.game_mode.get_game_status() == GameStatus.ONGOING):
-            self.wait(False)
+            self.wait(first_dart)
+
+            if(first_dart):
+                self.create_new_matrix()
+                first_dart = False
+
             score = int(self.get_score())
             self.GUI.show_score(score)
-            self.game_mode.give_points(score)
-            time.sleep(2)
+            self.game_mode.give_points(score) 
 
             if self.game_mode.get_game_status() == GameStatus.GET_DARTS:
-                self.GUI.show_get_darts_screen()
+                time.sleep(2)
+                self.GUI.show_get_darts_screen(score)
                 self.wait_detect()
                 self.game_mode.set_game_status(GameStatus.ONGOING)
-
-            self.GUI.show_waiting_screen()
+                first_dart = True
+                self.GUI.show_waiting_screen()
+            else:
+                self.GUI.show_waiting_screen(show_score=True, Score=score)
 
         print("Game over!")
-
 
 if __name__ == '__main__':
     dart = Dart()

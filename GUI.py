@@ -57,12 +57,15 @@ class Game_GUI(object):
         self.score.config(text=f'Score: {score}')
         self.score.config(bg='white')
 
-    def show_waiting_screen(self):
-        self.score.config(text='Waiting for dart')
+    def show_waiting_screen(self, show_score=False, Score=0):
+        if show_score:
+            self.score.config(text=f'Waiting for dart\nscore: {Score}')
+        else:
+            self.score.config(text='Waiting for dart')
         self.score.config(bg='white')
 
-    def show_get_darts_screen(self):
-        self.score.config(text='Get your darts!')
+    def show_get_darts_screen(self, score):
+        self.score.config(text=f'Get your darts!\nscore: {score}')
         self.score.config(bg='white')
 
     def exit_game(self):
