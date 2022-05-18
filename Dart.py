@@ -98,17 +98,16 @@ class Dart:
         first_dart = True
 
         while(self.game_mode.get_game_status() == GameStatus.ONGOING):
-            self.wait(first_dart)
-            start_time = time.time()
-
             if(first_dart):
+                start_time = time.time()
+                print("--- %s miliseconds ---" % ((time.time() - start_time)*1000))
                 self.create_new_matrix()
                 first_dart = False
+            self.wait(first_dart)
 
             score = int(self.get_score())
             self.GUI.show_score(score)
             self.game_mode.give_points(score) 
-            print("--- %s miliseconds ---" % ((time.time() - start_time)*1000))
 
             if self.game_mode.get_game_status() == GameStatus.GET_DARTS:
                 time.sleep(2)
