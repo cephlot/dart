@@ -80,13 +80,13 @@ class Dart:
         """        
         if(self.evaluator == None):
             self.evaluator = ScoreEvaluator()
-        self.evaluator.create_projection_matrix(self.frames_before)
+        self.evaluator.create_projection_matrix(self.detector.read_frames())
 
     def initialize_GUI(self):
         """Open the cameras and show screens at the beginning of the game
         """        
         self.GUI.show_game_screen()
-        self.detector.open_cameras()
+        self.frames_before = self.detector.open_cameras()
         self.GUI.show_waiting_screen()
 
 
