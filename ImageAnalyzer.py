@@ -31,7 +31,6 @@ class ImageAnalyzer:
 
             contours, _  = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
-            print(len(contours))
             if len(contours) == 0:
                 return True
         return False

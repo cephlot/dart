@@ -110,8 +110,9 @@ class DartLocalization:
         #imshow("thresh before", threshold)
         contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours) == 0:
-            print("ERROR getContour no contours")
+            print("ERROR - DartLoalization.getContour - No Contour returing (-1,-1)")
             return -1,-1
+
         cnts = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
 
         threshold = np.zeros(threshold.shape, np.uint8)
@@ -121,7 +122,7 @@ class DartLocalization:
 
         contours, hierarchy = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         if len(contours) == 0:
-            print("ERROR getContour no contours")
+            print("ERROR - DartLoalization.getContour - No Contour returing (-1,-1)")
             return -1,-1
 
         c = max(contours, key = cv2.contourArea)

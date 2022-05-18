@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 
-class CoordinateProjector:    
+class CoordinateProjector:
     '''
     Class for projecting dart coordinates from camera image
     onto a statis point mask image in order to get the points.
@@ -11,7 +11,7 @@ class CoordinateProjector:
     First generate Matrix and then project the coordinates.
     '''
     
-    def __init__(self, image_reference):
+    def __init__(self, image_reference):      
         if (image_reference is None):
             print("Reference image is None on init for CoordinateProjector.")
         self.img_ref = image_reference
@@ -46,12 +46,12 @@ class CoordinateProjector:
             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
             matrix, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
-            matchesMask = mask.ravel().tolist()
+            '''matchesMask = mask.ravel().tolist()
             h,w = img_cam.shape
             pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
             dst = cv.perspectiveTransform(pts,matrix)
-            img_ref = cv.polylines(img_ref,[np.int32(dst)],True,255,3, cv.LINE_AA)
-        else:
+            img_ref = cv.polylines(img_ref,[np.int32(dst)],True,255,3, cv.LINE_AA)'''
+        else:   
             print( "Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT) )
             return None
         '''img_warped = cv.warpPerspective(img_cam,matrix,self.img_ref.shape)
@@ -118,7 +118,7 @@ class CoordinateProjector:
         c = cv.perspectiveTransform(c, self.matrix)
         return (int(c[0][0][0]), int(c[0][0][1]))
 
-    def hasMatrix(self):        
+    def hasMatrix(self):
         if(self.matrix is None):
             return False
         return True
