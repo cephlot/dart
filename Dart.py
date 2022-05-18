@@ -90,7 +90,8 @@ class Dart:
         Evaluator will then create a new projection matrix for that player and use that under that players turn.
         """        
         self.GUI.show_game_screen()
-        self.frames_before = self.detector.open_cameras()        
+        self.frames_before = self.detector.open_cameras() 
+        print("--- Open cameras are : ", self.detector.camera_indices, " --- ")    
         first_dart = True
 
         while(self.game_mode.get_game_status() == GameStatus.ONGOING):

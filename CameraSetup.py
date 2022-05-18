@@ -16,13 +16,13 @@ class cameraSetup:
         :rtype: int
         """
         cap = cv.VideoCapture(source)
-        # width = cap.get(cv.CAP_PROP_FRAME_WIDTH)
-        # height = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
+        cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+        width = cap.get(cv.CAP_PROP_FRAME_WIDTH)
+        height = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
         if cap is None or not cap.isOpened():
             print('Warning: unable to open video source: ', source)
             return 1
-        cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
         return 0
 
     @staticmethod
@@ -33,7 +33,7 @@ class cameraSetup:
         :type exception: int
         :return: list of capture devices
         :rtype: list
-        """
+        """        
         valid_cams = []
         for i in range(8):
             if i is not exception:
