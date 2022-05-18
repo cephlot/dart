@@ -6,7 +6,7 @@ const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
 
-let obj = {player_scores: [301, 301, 301, 301]}
+let obj = {player_scores: [301, 301, 301, 301], current_player: 0}
 var clients = [];
 
 io.listen(server);
@@ -42,7 +42,6 @@ app.post('/', (req, res) => {
     obj = req.body
 
 	console.log(req.body)
-
 	res.render('index', obj)
 })
 
