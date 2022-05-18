@@ -82,27 +82,23 @@ class Dart:
             self.evaluator = ScoreEvaluator()
         self.evaluator.create_projection_matrix(self.detector.read_frames())
 
-    def initialize_GUI(self):
-        """Open the cameras and show screens at the beginning of the game
-        """        
-        self.GUI.show_game_screen()
-        self.frames_before = self.detector.open_cameras()
-        self.GUI.show_waiting_screen()
 
 
     def game(self):
         """The game loop. First dart indicates if a throw is the first throw for a player.
         Evaluator will then create a new projection matrix for that player and use that under that players turn.
         """        
-        self.initialize_GUI()
+        self.GUI.show_game_screen()
+        self.frames_before = self.detector.open_cameras()        
         first_dart = True
 
         while(self.game_mode.get_game_status() == GameStatus.ONGOING):
             if(first_dart):
                 start_time = time.time()
-                print("--- %s miliseconds ---" % ((time.time() - start_time)*1000))
                 self.create_new_matrix()
+                print("--- %s miliseconds ---" % ((time.time() - start_time)*1000))
                 first_dart = False
+            self.GUI.show_waiting_screen()
             self.wait(first_dart)
 
             score = int(self.get_score())
