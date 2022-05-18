@@ -22,9 +22,8 @@ class ScoreEvaluator:
         self.PIXEL_FACTOR = 10
         self.projectors = []
 
-    "TODO: Make evaluate only generate new transformation matrix when new player by taking boolean parameter"
-    def evaluate(self, image_B_frames, image_I_frames, b_create_matrix):
-        """Uses the RegionSegmenter and dart localizer to score
+    def evaluate(self, image_B_frames, image_I_frames):
+        """Uses the RegionSegmenter and dart localizer to score, call create_projection_matrix before calling this
         :param image_B_frames: images from all cameras before dart is thrown
         :type image_B_frames: list
         :param image_I_frames: images from all cameras after dart is thrown
@@ -35,8 +34,7 @@ class ScoreEvaluator:
         :return: 0 if all transformations are bad
         :rtype: int
         """
-        self.create_projectors_check(image_B_frames, b_create_matrix)
-        if(self.error_check_image_length(image_B_frames, image_I_frames)):  return 0
+        if(self.error_check_input(image_B_frames, image_I_frames)):  return 0
         coordinate_list         =  self.get_dart_coordinates(image_B_frames, image_I_frames)
         coordinate_list         =  self.check_if_no_dart(coordinate_list)
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
@@ -60,23 +58,8 @@ class ScoreEvaluator:
         print("score: ", score)
         return score
 
-    def score_coordinate(self, coordinate):
-        """Scors the average dart coordinate using scoring mask
-        :param coordinate: coordinate to compute from
-        :type coordinate: list
-        :return: score 
-        :rtype: int
-        """
 
-        score = 0
-        try:
-            score = self.board_mask[round(coordinate[1])][round(coordinate[0])]
-        except Exception as e:
-            print("Can't score dart, coordinate is outside of range")
-            print(e)
-        return score
-
-    def error_check_image_length(self, image_B_frames,image_I_frames):
+    def error_check_input(self, image_B_frames,image_I_frames):
         """Checks the length of image lists
         :param image_B_frames: list of images before
         :type image_B_frames: list
@@ -85,11 +68,48 @@ class ScoreEvaluator:
         :return: 1 if the lengths aren't the same, 0 otherwise
         :rtype: int
         """
-
+        if(len(self.projectors) != len(image_B_frames)):
+            print("ERROR - ScoreEvaluator.error_check_input - :  Did not get expected amount of frames as input")
         if(len(image_B_frames) != len(image_I_frames)):
             print("ERROR: Different length of image_B_frames and image_I_frames in evaluator")
             return 1
+        if(len(image_B_frames) == 0):
+            print("ERROR: No images to evaluate")
+            return 1
         return 0
+
+    def create_projection_matrix(self, image_B_frames):
+        """Creates new projection matrix for projectors
+        :param image_B_frames: before frames for projection matrix
+        :type image_B_frames: list of images
+        :param b_create_matrix: true if the program should create new matrix
+        :type b_create_matrix: bool
+        """
+        print("create_projection_matrix - creating new Projection Matrix")
+
+        if(len(self.projectors) == 0):
+            self.create_projection_matrix_helper(image_B_frames, True)
+        elif(len(image_B_frames) != len(self.projectors)):
+            print("ERROR: Recieved less frames than expected to create Porjection Matrices")
+            return 
+        else:
+            self.create_projection_matrix_helper(image_B_frames, False)
+
+
+    def create_projection_matrix_helper(self, image_B_frames, no_existing_projectors):
+        """Creates projectors and their projection matrix for all cameras if no exists
+        otherwise only creates new projection matrix 
+        :param image_B_frames: images before dart is thrown
+        :type image_B_frames: list
+        :return: projectors
+        :rtype: list
+        """
+        for i, image_b in enumerate(image_B_frames):
+            if(no_existing_projectors):
+                self.projectors.append(CoordinateProjector(self.reference))
+            image_B_gray = cv.cvtColor(image_b, cv.COLOR_BGR2GRAY)
+            self.projectors[i].generate_matrix(image_B_gray)
+
 
     def get_dart_coordinates(self, image_B_frames, image_I_frames):
         """ Returns all dart coordinate estimates found by DartLocalization using all cameras before and after images
@@ -112,37 +132,8 @@ class ScoreEvaluator:
         return coordinate_list
 
 
-    def create_projectors_check(self, image_B_frames, b_create_matrix):
-        """check if the class must create projections matrices or not.
-        Will create matrix if b_create_matrix is true or if no matrix already exists
 
-        :param image_B_frames: before frames for projection matrix
-        :type image_B_frames: list of images
-        :param b_create_matrix: true if the program should create new matrix
-        :type b_create_matrix: bool
-        """        
-        if(b_create_matrix):
-            self.projectors = self.create_projectors(image_B_frames)
-        elif(len(self.projectors) == 0):
-            print("create_projectors_check -- ERROR -- called with b_create_matrix = false and no pre-constructed matrises for projections!")
-            print("Will create matrix anyways")
-            self.projectors = self.create_projectors(image_B_frames)
 
-    def create_projectors(self, image_B_frames):
-        """Creates projectors and their projection matrix for all cameras 
-        :param image_B_frames: images before dart is thrown
-        :type image_B_frames: list
-        :return: projectors
-        :rtype: list
-        """
-
-        projectors = []
-        for i, image_b in enumerate(image_B_frames):
-            print("create_projectors, image_b shape", image_b.shape)
-            projectors.append(CoordinateProjector(self.reference))
-            image_B_gray = cv.cvtColor(image_b, cv.COLOR_BGR2GRAY)
-            projectors[i].generate_matrix(image_B_gray)
-        return projectors
 
     def check_if_no_dart(self, coordinate_list):
         """Removes darrts from coordinate list that were not found
@@ -223,6 +214,22 @@ class ScoreEvaluator:
                 print(f"check_negative_projection -- ERROR -- Projected coordinate for dart out of bounce {c}")
                 coordinatesCopy.remove(c)
         return coordinatesCopy
+
+    def score_coordinate(self, coordinate):
+        """Scors the average dart coordinate using scoring mask
+        :param coordinate: coordinate to compute from
+        :type coordinate: list
+        :return: score 
+        :rtype: int
+        """
+
+        score = 0
+        try:
+            score = self.board_mask[round(coordinate[1])][round(coordinate[0])]
+        except Exception as e:
+            print("Can't score dart, coordinate is outside of range")
+            print(e)
+        return score
 
     def average_coordinates(self, coordinates):
         """Calculates the average coordinates

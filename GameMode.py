@@ -71,7 +71,6 @@ class GameMode301(GameMode):
 
 		self.throw_count += 1
 		if (self.throw_count >= 3):
-			print("lmao xd")
 			self.change_player()
 			self.game_status = GameStatus.GET_DARTS
 
