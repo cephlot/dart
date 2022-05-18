@@ -40,9 +40,6 @@ class ImageAnalyzer:
             thresh_frame = thresh_frame[20:thresh_frame.shape[0]-20, 20:thresh_frame.shape[1]-20]
             thresh_frame = cv.erode(src=thresh_frame, kernel=np.ones((6,6)))
 
-            cv.imwrite('threshold.png', thresh_frame)
-            cv.imwrite('diff.png', diff_frame)
-
             contours, _  = cv.findContours(thresh_frame, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
             print(len(contours))
