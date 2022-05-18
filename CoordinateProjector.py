@@ -16,8 +16,8 @@ class CoordinateProjector:
             print("Reference image is None on init for CoordinateProjector.")
         self.img_ref = image_reference
         self.matrix = None
-        self.MIN_MATCH_COUNT = 50
-        self.NFEATURES = 600
+        self.MIN_MATCH_COUNT = 20
+        self.NFEATURES = 300
 
     def set_img_ref(self, image_reference):
         """Sets image reference
