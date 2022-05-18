@@ -26,8 +26,8 @@ class MotionDetector:
         self.caps = [None] * len(self.camera_indices)
         for i in range(len(self.caps)):
             self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
-            self.caps[i].set(cv2.CAP_PROP_FRAME_WIDTH, 1280);
-            self.caps[i].set(cv2.CAP_PROP_FRAME_HEIGHT, 720);
+            #self.caps[i].set(cv2.CAP_PROP_FRAME_WIDTH, 1280);
+            #self.caps[i].set(cv2.CAP_PROP_FRAME_HEIGHT, 720);
 
         cameraSetup.stabilize(self.camera_indices, self.caps)
 
