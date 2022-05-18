@@ -3,7 +3,7 @@ html
   head
     title Scoreboard
   style.
-    .score-board {
+    #score-board {
     text-align: center;
     padding: 25px;
     }
@@ -25,7 +25,7 @@ html
     border: 3px solid black;
     border-radius: 5px;
     padding: 30px;
-    background-color: #8aff8d;
+    background-color: #a3ff8a;
     color: #2CB3C9;
     }
 
@@ -34,7 +34,57 @@ html
     }
 
   body
+
+    script.
+      var player_count = null
+
     script(src="/socket.io/socket.io.js")
+
+    script.
+      function add_player() {
+        new_div = document.createElement("div");
+        new_div.classList.add("player");
+
+        player_title = document.createElement("h4");
+        player_title.innerHTML = "Player " + player_count;
+
+        score_box = document.createElement("div");
+        score_box.setAttribute("id", player_count);
+        score_box.classList.add("score-box")
+        score_box.innerHTML = 404
+
+        new_div.appendChild(player_title);
+        new_div.appendChild(score_box);
+
+        document.getElementById("score-board").appendChild(new_div);
+
+        player_count = player_count + 1;
+      }
+
+      function remove_player() {
+        board = document.getElementById("score-board");
+        board.lastChild.remove();
+        player_count = player_count - 1;
+      }
+
+      function update_scores(scores) {
+        for (var i = 0; i < scores.length; i++) {
+          document.getElementById(i).innerHTML = scores[i];
+        }
+      }
+
+      function set_current_player(id) {
+        for (var i = 0; i < player_count; i++) {
+          score_box = document.getElementById(i);
+          if (score_box.classList.contains("score-box-current")) {
+            score_box.classList.remove("score-box-current");
+            score_box.classList.add("score-box");
+          }
+        }
+        
+        score_box = document.getElementById(id).classList.add("score-box-current");
+      }
+
     script.
       var socket = io();
 
@@ -43,25 +93,23 @@ html
       });
 
       socket.on('data', function(data) {
-        
-        var scores = data['player_scores']        
-        for (var i = 0; i < scores.length; i++) {
-          document.getElementById(i).innerHTML = scores[i];
+        var scores = data['player_scores']   
 
-          var classes = document.getElementById(i).classList
-          if (classes.contains('score-box-current')) {
-            classes.remove('score-box-current')
-            classes.add('score-box')
-          }
+        if (player_count == null) {
+          player_count = document.getElementById("score-board").childElementCount;
         }
 
-        var current_player = data['current_player']
-        var classes = document.getElementById(current_player).classList
-        classes.add('score-box-current')
+        for ( ; player_count < scores.length; add_player());
+        for ( ; player_count > scores.length; remove_player());
+        update_scores(scores);
+
+        if (data['current_player'] != null) {
+          set_current_player(data['current_player']);
+        }
 
       });
     
-    .score-board
+    #score-board
       - var current_player = current_player
       - var player_count = player_scores.length
       - for (var x = 0; x < player_count; x++)
