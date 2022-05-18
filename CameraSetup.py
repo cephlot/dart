@@ -39,6 +39,8 @@ class cameraSetup:
             if i is not exception:
                 if cameraSetup.testDevice(i) == 0:
                     valid_cams.append(i)
+                else:
+                    print(" --- Able to open camera ", i, " --- ")
         return valid_cams
 
     @staticmethod
