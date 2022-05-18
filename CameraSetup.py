@@ -49,7 +49,8 @@ class cameraSetup:
         :raises RuntimeError: If running on unknown OS
         :return: 0 if linux or win32, 1 if darwin
         :rtype: int
-        """        
+        """  
+        return 5000      
         if platform == "linux" or platform == "linux2":
             return 0
         elif platform == "darwin":
