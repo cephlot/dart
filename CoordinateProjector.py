@@ -16,7 +16,8 @@ class CoordinateProjector:
             print("Reference image is None on init for CoordinateProjector.")
         self.img_ref = image_reference
         self.matrix = None
-        self.MIN_MATCH_COUNT = 35
+        self.MIN_MATCH_COUNT = 50
+        self.NFEATURES = 600
 
     def set_img_ref(self, image_reference):
         """Sets image reference
@@ -80,7 +81,7 @@ class CoordinateProjector:
         @return kp2 keypoints from reference picture
         @return matches match list between keypoints
         '''
-        sift = cv.SIFT_create(400)
+        sift = cv.SIFT_create(self.NFEATURES )
         kp1, des1 = sift.detectAndCompute(img_cam,None)
         kp2, des2 = sift.detectAndCompute(self.img_ref,None)
         FLANN_INDEX_KDTREE = 1

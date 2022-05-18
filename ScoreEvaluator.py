@@ -34,6 +34,7 @@ class ScoreEvaluator:
         :return: 0 if all transformations are bad
         :rtype: int
         """
+        print(image_B_frames[0].shape)
         if(self.error_check_input(image_B_frames, image_I_frames)):  return 0
         coordinate_list         =  self.get_dart_coordinates(image_B_frames, image_I_frames)
         coordinate_list         =  self.check_if_no_dart(coordinate_list)
