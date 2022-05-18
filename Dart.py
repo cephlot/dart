@@ -76,7 +76,8 @@ class Dart:
 
 
     def create_new_matrix(self):
-        """wrapper for create_projection_matrix, will generate a new ScoreEvaluator if needed
+        """wrapper for create_projection_matrix, will generate a new ScoreEvaluator if needed.
+        Reads new frames in order to make the matrix every time.
         """        
         if(self.evaluator == None):
             self.evaluator = ScoreEvaluator()
@@ -97,9 +98,10 @@ class Dart:
                 start_time = time.time()
                 self.create_new_matrix()
                 print("--- %s miliseconds ---" % ((time.time() - start_time)*1000))
-                first_dart = False
             self.GUI.show_waiting_screen()
             self.wait(first_dart)
+            first_dart = False
+
 
             score = int(self.get_score())
             self.GUI.show_score(score)
