@@ -13,6 +13,19 @@ from ImageNormalizer import ImageNormalizer
 class DartLocalization:
 
     def drawAxis(img, p_, q_, colour, scale):
+        """draw out axis on the image
+
+        :param img: input image
+        :type img: image
+        :param p_: p values
+        :type p_: int
+        :param q_: q values
+        :type q_: int
+        :param colour: color of the arrow
+        :type colour: int
+        :param scale: scale of the image
+        :type scale: image
+        """        
         p = list(p_)
         q = list(q_)
         
@@ -31,7 +44,15 @@ class DartLocalization:
         cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), colour, 1, cv2.LINE_AA)
 
     def getOrientation(pts, img):
-    
+        """get the orientation of a blob of pixels using PCA to calculate direction of the dart
+
+        :param pts: points of interest (coordinates)
+        :type pts: int
+        :param img: input image
+        :type img: image
+        :return: the angle in radiants
+        :rtype: float
+        """        
         sz = len(pts)
         data_pts = np.empty((sz, 2), dtype=np.float64)
         for i in range(data_pts.shape[0]):
@@ -55,7 +76,24 @@ class DartLocalization:
     
 
 
-    def dist(x1,y1, x2,y2, x3,y3): # x3,y3 is the point
+    def dist(x1,y1, x2,y2, x3,y3):
+        """get the distance between points
+
+        :param x1: x coordinate 1
+        :type x1: int
+        :param y1: y coordinate 1
+        :type y1: int
+        :param x2: x coordinate 2
+        :type x2: int
+        :param y2: y coordinate 2
+        :type y2: int
+        :param x3: x coordinate 3
+        :type x3: int
+        :param y3: y coordinate 3
+        :type y3: int
+        :return: distance between points
+        :rtype: int
+        """        
         px = x2-x1
         py = y2-y1
 
@@ -73,12 +111,6 @@ class DartLocalization:
 
         dx = x - x3
         dy = y - y3
-
-        # Note: If the actual distance does not matter,
-        # if you only want to compare what this function
-        # returns to other results of this function, you
-        # can just return the squared distance instead
-        # (i.e. remove the sqrt) to gain a little performance
 
         dist = math.sqrt(dx*dx + dy*dy)
 
