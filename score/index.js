@@ -5,9 +5,18 @@ var bodyParser = require('body-parser');
 const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
+var path = require('path');
+const sharp = require('sharp');
+const fs = require('fs');
 
-let obj = {player_scores: [301, 301, 301, 301], current_player: 0}
 var clients = [];
+
+sharp('public/ref.jpg')
+	.toFile('public/combined.jpg', function(err) {
+		console.log('Error: ', err)
+	});
+
+let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'}
 
 io.listen(server);
 
@@ -16,6 +25,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ 
 	extended: true 
  }));
+
+ app.use("/public", express.static(path.join(__dirname, 'public')));
 
  io.sockets.on('connect', function() {
     clients.push(io.sockets);
@@ -46,11 +57,43 @@ app.post('/', (req, res) => {
 })
 
 app.delete('/', (_req, res) => {
-	obj = {"p1_score": "0", "p2_score": "0"};
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'};
+
+	res.render('index', obj)
+})
+
+app.post('/coord', (req, res) => {
+	sharp('public/marker.png')
+	.resize(50, 50)
+	.toBuffer({ resolveWithObject: true })
+	.then(({data, info}) => {
+		sharp('public/combined.jpg')
+		.composite([{
+			input: data,
+			left: 50, 
+			top: 50,
+		}])
+		.toBuffer(function(err, buffer) {
+			fs.writeFile('public/combined.jpg', buffer, function(e) {});
+		});
+	})
+	
+
+	res.render('index', obj)
+})
+
+app.delete('/coord', (_req, res) => {
+	sharp('public/ref.jpg')
+	.toFile('public/combined.jpg', function(err) {
+		console.log('Error: ', err)
+	});
+
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'};
 
 	res.render('index', obj)
 })
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
+
 })
