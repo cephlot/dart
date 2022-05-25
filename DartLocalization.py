@@ -120,7 +120,7 @@ class DartLocalization:
         img_blur = cv2.GaussianBlur(diff, (3,3), 0)
         img_blur = cv2.bilateralFilter(img_blur, 5, 20, 20)
 
-        _, img_threshold = cv2.threshold(img_blur, 25, 255, cv2.THRESH_BINARY)
+        _, img_threshold = cv2.threshold(img_blur, 30, 255, cv2.THRESH_BINARY)
         return img_threshold
 
     def erode_dilate(image_thresh):
@@ -174,7 +174,12 @@ class DartLocalization:
         :rtype: image
         """        
         xb,yb,wb,hb = cv2.boundingRect(img)
-        
+
+        print(wb)
+        if wb == None:
+            print("ERROR - Dartlocalization.LinearErode - wb is None")
+            wb = 85
+
         rotated_horizontal = int(wb // 10)
 
         horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (rotated_horizontal, 1))
@@ -244,7 +249,7 @@ class DartLocalization:
         center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=enhanced)
         max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=enhanced, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
 
-        #DartLocalization.printDebug(enhanced, max_x, max_y, op_x, op_y, boarder_limit, clean)
+        DartLocalization.printDebug(enhanced, max_x, max_y, op_x, op_y, boarder_limit, clean)
 
         return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, boarder_limit=boarder_limit)
     
