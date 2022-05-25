@@ -9,14 +9,13 @@ var path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
 
+sharp.cache(false);
+
 var clients = [];
 
-sharp('public/ref.jpg')
-	.toFile('public/combined.jpg', function(err) {
-		console.log('Error: ', err)
-	});
+var current_image = 'public/combined' + new Date().getTime() + '.jpg'
 
-let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'}
+let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: current_image}
 
 io.listen(server);
 
@@ -57,43 +56,48 @@ app.post('/', (req, res) => {
 })
 
 app.delete('/', (_req, res) => {
-	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'};
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
 
 	res.render('index', obj)
 })
 
 app.post('/coord', (req, res) => {
+	var new_image = 'public/combined' + new Date().getTime() + '.jpg';
+
+	console.log('current ', current_image);
+	console.log('new ', new_image);
+
 	sharp('public/marker.png')
-	.resize(50, 50)
-	.toBuffer({ resolveWithObject: true })
-	.then(({data, info}) => {
-		sharp('public/combined.jpg')
-		.composite([{
-			input: data,
-			left: 50, 
-			top: 50,
-		}])
+		.resize(50, 50)
+		.toBuffer({ resolveWithObject: true })
+		.then(({data, info}) => {
+			sharp(current_image)
+				.composite([{
+					input: data,
+					left: 50, 
+					top: 50,
+			}])
 		.toBuffer(function(err, buffer) {
-			fs.writeFile('public/combined.jpg', buffer, function(e) {});
+			fs.writeFile(new_image, buffer, function(e) {});
+			fs.unlinkSync(current_image);
+			current_image = new_image;
+			obj.image = current_image;
+			res.render('index', obj)
 		});
 	})
-	
-
-	res.render('index', obj)
 })
 
 app.delete('/coord', (_req, res) => {
-	sharp('public/ref.jpg')
-	.toFile('public/combined.jpg', function(err) {
-		console.log('Error: ', err)
-	});
-
-	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/combined.jpg'};
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
 
 	res.render('index', obj)
 })
 
 server.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  sharp('public/ref.jpg')
+	  .toBuffer(function(err, buffer) {
+		fs.writeFile(current_image, buffer, function(e) {});
+	  });
 
+  console.log(`Example app listening on port ${port}`)
 })
