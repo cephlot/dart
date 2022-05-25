@@ -1,13 +1,8 @@
 import math
 import cv2
-from cv2 import imshow
-from cv2 import goodFeaturesToTrack
-from matplotlib import pyplot as plt
 import numpy as np
-from scipy.ndimage.interpolation import rotate
 from math import atan2, cos, sin, sqrt, pi
 
-from sklearn.metrics import roc_auc_score
 from ImageNormalizer import ImageNormalizer
 
 class DartLocalization:
