@@ -9,12 +9,8 @@ var path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
 
-sharp.cache(false);
-
 var clients = [];
-
 var current_image = 'public/combined' + new Date().getTime() + '.jpg'
-
 let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: current_image}
 
 io.listen(server);
