@@ -99,7 +99,8 @@ class Dart:
                 self.create_new_matrix()
                 first_dart = False
 
-            score, coords = int(self.get_score())
+            score, coords = self.get_score()
+            score = int(score)
             self.GUI.show_score(score)
             self.game_mode.give_points(score, coords) 
 
@@ -110,6 +111,7 @@ class Dart:
                 self.game_mode.set_game_status(GameStatus.ONGOING)
                 first_dart = True
                 self.GUI.show_waiting_screen()
+                Requester.delete_coords()
             else:
                 self.GUI.show_waiting_screen(show_score=True, Score=score)
 
