@@ -63,9 +63,7 @@ app.delete('/', (_req, res) => {
 
 app.post('/coord', (req, res) => {
 	var new_image = 'public/combined' + new Date().getTime() + '.jpg';
-
-	console.log('current ', current_image);
-	console.log('new ', new_image);
+	const coords = req.body;
 
 	sharp('public/marker.png')
 		.resize(50, 50)
@@ -74,8 +72,8 @@ app.post('/coord', (req, res) => {
 			sharp(current_image)
 				.composite([{
 					input: data,
-					left: 50, 
-					top: 50,
+					left: coords.x, 
+					top: coords.y,
 			}])
 		.toBuffer(function(err, buffer) {
 			fs.writeFile(new_image, buffer, function(e) {});
