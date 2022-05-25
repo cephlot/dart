@@ -178,7 +178,7 @@ class DartLocalization:
         print(wb)
         if wb == None:
             print("ERROR - Dartlocalization.LinearErode - wb is None")
-            wb = 85
+            return -1, -1
 
         rotated_horizontal = int(wb // 10)
 
