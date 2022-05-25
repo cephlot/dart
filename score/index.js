@@ -62,14 +62,14 @@ app.post('/coord', (req, res) => {
 	const coords = req.body;
 
 	sharp('public/marker.png')
-		.resize(50, 50)
+		.resize(30, 30)
 		.toBuffer({ resolveWithObject: true })
 		.then(({data, info}) => {
 			sharp(current_image)
 				.composite([{
 					input: data,
-					left: coords.x, 
-					top: coords.y,
+					left: coords.x-15, 
+					top: coords.y-15,
 			}])
 		.toBuffer(function(err, buffer) {
 			fs.writeFile(new_image, buffer, function(e) {});
