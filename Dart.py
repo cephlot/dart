@@ -99,9 +99,9 @@ class Dart:
                 self.create_new_matrix()
                 first_dart = False
 
-            score = int(self.get_score())
+            score, coords = int(self.get_score())
             self.GUI.show_score(score)
-            self.game_mode.give_points(score) 
+            self.game_mode.give_points(score, coords) 
 
             if self.game_mode.get_game_status() == GameStatus.GET_DARTS:
                 time.sleep(2)
