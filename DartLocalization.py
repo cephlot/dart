@@ -244,7 +244,7 @@ class DartLocalization:
         center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=enhanced)
         max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=enhanced, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
 
-        DartLocalization.printDebug(enhanced, max_x, max_y, op_x, op_y, boarder_limit, clean)
+        #DartLocalization.printDebug(enhanced, max_x, max_y, op_x, op_y, boarder_limit, clean)
 
         return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, boarder_limit=boarder_limit)
     
