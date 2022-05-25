@@ -99,7 +99,8 @@ class Dart:
                 self.create_new_matrix()
                 first_dart = False
 
-            score, coords = int(self.get_score())
+            score, coords = self.get_score()
+            score = int(score)
             self.GUI.show_score(score)
             self.game_mode.give_points(score, coords) 
 
