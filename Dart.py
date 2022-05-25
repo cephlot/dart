@@ -111,6 +111,7 @@ class Dart:
                 self.game_mode.set_game_status(GameStatus.ONGOING)
                 first_dart = True
                 self.GUI.show_waiting_screen()
+                Requester.delete_coords()
             else:
                 self.GUI.show_waiting_screen(show_score=True, Score=score)
 

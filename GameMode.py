@@ -83,6 +83,5 @@ class GameMode301(GameMode):
 		self.current_player = (self.current_player + 1) % self.player_count
 		self.prev_score = self.scores[self.current_player]
 		self.throw_count = 0
-		Requester.delete_coords()
 
 
