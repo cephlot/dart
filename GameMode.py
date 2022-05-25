@@ -1,6 +1,8 @@
 from LightController import LightController
 from Requester import Requester
 from enum import Enum
+import threading
+import time
 import abc
 
 class GameStatus(Enum):
@@ -8,6 +10,7 @@ class GameStatus(Enum):
 	GET_DARTS 	= 1
 	GAME_OVER 	= 2
 	GAME_WON  	= 3
+	WAIT  		= 4
 
 class GameMode(object):
 	"""Pogger"""
@@ -17,8 +20,6 @@ class GameMode(object):
 		self.current_player = None
 		self.game_status 	= None
 		self.winner 		= None 
-
-		self.light = LightController.LightController('/dev/ttyUSB0')
 	
 	@abc.abstractmethod
 	def start_game(self, player_count):
@@ -45,6 +46,7 @@ class GameMode301(GameMode):
 		super().__init__()
 		self.throw_count 	= None
 		self.prev_score 	= None
+		self.light = LightController('/dev/ttyUSB0')
 
 	def start_game(self, player_count):
 		super().start_game(player_count)
@@ -55,9 +57,15 @@ class GameMode301(GameMode):
 		self.throw_count 	= 0
 		self.prev_score 	= 0
 
-		light.white()
+		self.light.white()
 		Requester.post_scores(self.scores, self.current_player)
 
+	def feedback(self):
+		self.light.rainbow()
+		time.sleep(1)
+		self.light.white()
+		time.sleep(1)
+		
 	def give_points(self, score):
 
 		if (self.game_status != GameStatus.ONGOING):
@@ -72,6 +80,8 @@ class GameMode301(GameMode):
 			return
 		elif (self.scores[self.current_player] < 0):
 			self.change_player()
+
+		self.feedback()
 
 		self.throw_count += 1
 		if (self.throw_count >= 3):
