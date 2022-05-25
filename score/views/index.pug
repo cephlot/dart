@@ -118,12 +118,16 @@ html
           set_current_player(data['current_player']);
         }
 
+        if(data['image'] != null) {
+          document.getElementById("board").src = data['image'];
+        }
+
       });
 
     div
 
       .img
-        img.image(id='board', src=image)
+        img.image(id='board', src='/'+image)
       
       #score-board
         - var current_player = current_player
