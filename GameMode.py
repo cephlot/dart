@@ -1,3 +1,4 @@
+from LightController import LightController
 from Requester import Requester
 from enum import Enum
 import abc
@@ -16,6 +17,8 @@ class GameMode(object):
 		self.current_player = None
 		self.game_status 	= None
 		self.winner 		= None 
+
+		self.light = LightController.LightController('/dev/ttyUSB0')
 	
 	@abc.abstractmethod
 	def start_game(self, player_count):
@@ -52,6 +55,7 @@ class GameMode301(GameMode):
 		self.throw_count 	= 0
 		self.prev_score 	= 0
 
+		light.white()
 		Requester.post_scores(self.scores, self.current_player)
 
 	def give_points(self, score):
