@@ -100,6 +100,10 @@ class Dart:
                 first_dart = False
 
             score, coords = self.get_score()
+
+            if score == 0 and coords == (0,0):
+                continue
+
             score = int(score)
             self.GUI.show_score(score)
             self.game_mode.give_points(score, coords) 
