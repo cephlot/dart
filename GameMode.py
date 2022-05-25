@@ -1,3 +1,4 @@
+from urllib.request import Request
 from Requester import Requester
 from enum import Enum
 import abc
@@ -53,8 +54,9 @@ class GameMode301(GameMode):
 		self.prev_score 	= 0
 
 		Requester.post_scores(self.scores, self.current_player)
+		Requester.delete_coords()
 
-	def give_points(self, score):
+	def give_points(self, score, coords):
 
 		if (self.game_status != GameStatus.ONGOING):
 			return
@@ -75,10 +77,12 @@ class GameMode301(GameMode):
 			self.game_status = GameStatus.GET_DARTS
 
 		Requester.post_scores(self.scores, self.current_player)
+		Requester.post_coords(coords[0], coords[0])
 
 	def change_player(self):
 		self.current_player = (self.current_player + 1) % self.player_count
 		self.prev_score = self.scores[self.current_player]
 		self.throw_count = 0
+		Requester.delete_coords()
 
 

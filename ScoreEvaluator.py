@@ -56,7 +56,7 @@ class ScoreEvaluator:
         cv.waitKey(0) """
         score = self.score_coordinate(average_coordinate)
         print("score: ", score)
-        return score
+        return score, average_coordinate
 
 
     def error_check_input(self, image_B_frames,image_I_frames):
