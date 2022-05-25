@@ -9,7 +9,10 @@ class Game_GUI(object):
         self.window.config(bg='white')
         self.window.geometry('480x290')
         self.window.attributes('-fullscreen', True)
-        
+
+
+        self.top = Frame(self.window)
+        self.bottom = Frame(self.window,)        
         self.button = Button(self.window)
         self.start_game_button = Button(self.window)
         self.exit_button = Button(self.window)
@@ -27,17 +30,30 @@ class Game_GUI(object):
         self.score.config(text='Welcome to dart!', bg='white')
         self.score.pack(fill=BOTH, expand=1)
 
+    def change_on_hover(self, button, color_enter, color_leave):        
+        button.bind("<Enter>", func=lambda event: button.config(
+        background=color_enter))
+
+        button.bind("<Leave>", func=lambda event: button.config(
+        background=color_leave))        
+
+
     def show_start_screen(self, start_command):
         self.title.config(anchor=CENTER)
         self.title.config(text='D.A.R.T', bg='black', foreground='white')
-        self.title.pack(fill=BOTH, expand=1)
+        self.title.pack(side=TOP, fill=BOTH, expand=1)
+        
+        self.start_game_button.config(text='Start', font=('Courier',44), bg='#0d7a1a', foreground='black', height=5, command=start_command)
+        self.start_game_button.pack(side=LEFT, fill=BOTH, expand=1)
 
-        self.start_game_button.config(text='Start Game', font=('Courier',44), bg='green', foreground='black', command=start_command)
-        self.start_game_button.pack(fill=BOTH, expand=1, side=LEFT)
+        self.exit_button.config(text='Exit', font=('Courier',44), bg='#ba1411', foreground='black', height=5, command=self.exit_game)
+        self.exit_button.pack(side=LEFT, fill=BOTH, expand=1)  
 
-        self.exit_button.config(text='Exit', font=('Courier',44), bg='red', foreground='black', command=self.exit_game)
-        self.exit_button.pack(fill=BOTH, expand=1, side=LEFT)
+        self.change_on_hover(self.start_game_button, '#13ad25', '#0d7a1a')
+        self.change_on_hover(self.exit_button, '#e82723', '#ba1411')
+
         self.window.mainloop()
+
 
     def choose_player_amount(self, command):
         self.start_game_button.pack_forget() #Hide start screen
@@ -49,20 +65,24 @@ class Game_GUI(object):
             p_id = self.player_ids[i]
 
             self.player_amount_button[i] = Button(self.window)
-            self.player_amount_button[i].config(text=str(p_id), font=('Courier',44), bg='red', foreground='black', command=lambda k=p_id : command(k))
-            self.player_amount_button[i].pack(fill=BOTH, expand=1)
+            self.player_amount_button[i].config(text=str(p_id), font=('Courier',72), bg='#ba1411', foreground='black', command=lambda k=p_id : command(k))
+            self.change_on_hover(self.player_amount_button[i], '#e82723', '#ba1411')
+            self.player_amount_button[i].pack(side=LEFT, fill=BOTH, expand=1)
 
     def show_score(self, score):
         assert isinstance(score, int)
         self.score.config(text=f'Score: {score}')
         self.score.config(bg='white')
 
-    def show_waiting_screen(self):
-        self.score.config(text='Waiting for dart')
+    def show_waiting_screen(self, show_score=False, Score=0):
+        if show_score:
+            self.score.config(text=f'Waiting for dart\nscore: {Score}')
+        else:
+            self.score.config(text='Waiting for dart')
         self.score.config(bg='white')
 
-    def show_get_darts_screen(self):
-        self.score.config(text='Get your darts!')
+    def show_get_darts_screen(self, score):
+        self.score.config(text=f'Get your darts!\nscore: {score}')
         self.score.config(bg='white')
 
     def exit_game(self):
