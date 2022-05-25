@@ -5,9 +5,13 @@ var bodyParser = require('body-parser');
 const http = require('http');
 const io = require('socket.io')(http);
 var server = http.createServer(app);
+var path = require('path');
+const sharp = require('sharp');
+const fs = require('fs');
 
-let obj = {p1_score: 0, p2_score: 0}
 var clients = [];
+var current_image = 'public/combined' + new Date().getTime() + '.jpg'
+let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: current_image}
 
 io.listen(server);
 
@@ -16,6 +20,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ 
 	extended: true 
  }));
+
+ app.use("/public", express.static(path.join(__dirname, 'public')));
 
  io.sockets.on('connect', function() {
     clients.push(io.sockets);
@@ -42,16 +48,50 @@ app.post('/', (req, res) => {
     obj = req.body
 
 	console.log(req.body)
-
 	res.render('index', obj)
 })
 
 app.delete('/', (_req, res) => {
-	obj = {"p1_score": "0", "p2_score": "0"};
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
+
+	res.render('index', obj)
+})
+
+app.post('/coord', (req, res) => {
+	var new_image = 'public/combined' + new Date().getTime() + '.jpg';
+	const coords = req.body;
+
+	sharp('public/marker.png')
+		.resize(30, 30)
+		.toBuffer({ resolveWithObject: true })
+		.then(({data, info}) => {
+			sharp(current_image)
+				.composite([{
+					input: data,
+					left: coords.x-15, 
+					top: coords.y-15,
+			}])
+		.toBuffer(function(err, buffer) {
+			fs.writeFile(new_image, buffer, function(e) {});
+			fs.unlinkSync(current_image);
+			current_image = new_image;
+			obj.image = current_image;
+			res.render('index', obj)
+		});
+	})
+})
+
+app.delete('/coord', (_req, res) => {
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
 
 	res.render('index', obj)
 })
 
 server.listen(port, () => {
+  sharp('public/ref.jpg')
+	  .toBuffer(function(err, buffer) {
+		fs.writeFile(current_image, buffer, function(e) {});
+	  });
+
   console.log(`Example app listening on port ${port}`)
 })

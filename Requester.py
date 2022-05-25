@@ -16,6 +16,17 @@ class Requester:
         """
         assert isinstance(current_player, int)
         requests.post(IP, json={"player_scores": scores, "current_player": current_player})
+    
+    @staticmethod
+    def post_coords(x, y):
+        """Post dart coordinates to scoreboard
+
+        :param x: x value of dart
+        :type x: int
+        :param y: y value of dart
+        :type y: int
+        """        
+        requests.post(IP+"coord", json={"x": x, "y": y})
 
     @staticmethod
     def delete_scores():
@@ -23,3 +34,9 @@ class Requester:
         """
         
         requests.delete(IP)
+    
+    @staticmethod
+    def delete_coords():
+        """Deletes dart coordinates on scoreboard
+        """        
+        requests.delete(IP+"coord")
