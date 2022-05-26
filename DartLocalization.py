@@ -1,8 +1,69 @@
 import cv2
+import math
 import numpy as np
+from math import atan2, cos, sin, sqrt, pi
 from ImageNormalizer import ImageNormalizer
 
 class DartLocalization:
+    def drawAxis(img, p_, q_, colour, scale):
+        """draw out axis on the image
+        :param img: input image
+        :type img: image
+        :param p_: p values
+        :type p_: int
+        :param q_: q values
+        :type q_: int
+        :param colour: color of the arrow
+        :type colour: int
+        :param scale: scale of the image
+        :type scale: image
+        """        
+        p = list(p_)
+        q = list(q_)
+        
+        angle = atan2(p[1] - q[1], p[0] - q[0]) # angle in radians
+        hypotenuse = sqrt((p[1] - q[1]) * (p[1] - q[1]) + (p[0] - q[0]) * (p[0] - q[0]))
+        # Here we lengthen the arrow by a factor of scale
+        q[0] = p[0] - scale * hypotenuse * cos(angle)
+        q[1] = p[1] - scale * hypotenuse * sin(angle)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), colour, 1, cv2.LINE_AA)
+        # create the arrow hooks
+        p[0] = q[0] + 9 * cos(angle + pi / 4)
+        p[1] = q[1] + 9 * sin(angle + pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), colour, 1, cv2.LINE_AA)
+        p[0] = q[0] + 9 * cos(angle - pi / 4)
+        p[1] = q[1] + 9 * sin(angle - pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), colour, 1, cv2.LINE_AA)
+
+    def getOrientation(pts, img):
+        """get the orientation of a blob of pixels using PCA to calculate direction of the dart
+        :param pts: points of interest (coordinates)
+        :type pts: int
+        :param img: input image
+        :type img: image
+        :return: the angle in radiants
+        :rtype: float
+        """        
+        sz = len(pts)
+        data_pts = np.empty((sz, 2), dtype=np.float64)
+        for i in range(data_pts.shape[0]):
+            data_pts[i,0] = pts[i,0,0]
+            data_pts[i,1] = pts[i,0,1]
+        # Perform PCA analysis
+        mean = np.empty((0))
+        mean, eigenvectors, eigenvalues = cv2.PCACompute2(data_pts, mean)
+        # Store the center of the object
+        cntr = (int(mean[0,0]), int(mean[0,1]))
+        
+        
+        cv2.circle(img, cntr, 3, (255, 0, 255), 2)
+        p1 = (cntr[0] + 0.02 * eigenvectors[0,0] * eigenvalues[0,0], cntr[1] + 0.02 * eigenvectors[0,1] * eigenvalues[0,0])
+        p2 = (cntr[0] - 0.02 * eigenvectors[1,0] * eigenvalues[1,0], cntr[1] - 0.02 * eigenvectors[1,1] * eigenvalues[1,0])
+        DartLocalization.drawAxis(img, cntr, p1, (0, 255, 0), 1)
+        DartLocalization.drawAxis(img, cntr, p2, (255, 255, 0), 5)
+        angle = atan2(eigenvectors[0,1], eigenvectors[0,0]) # orientation in radians
+        
+        return angle
 
     def img2gray(img):
         """Takes in an image as an input and converts it into a
@@ -59,7 +120,7 @@ class DartLocalization:
         img_blur = cv2.GaussianBlur(diff, (3,3), 0)
         img_blur = cv2.bilateralFilter(img_blur, 5, 20, 20)
 
-        _, img_threshold = cv2.threshold(img_blur, 15, 255, cv2.THRESH_BINARY)
+        _, img_threshold = cv2.threshold(img_blur, 30, 255, cv2.THRESH_BINARY)
         return img_threshold
 
     def erode_dilate(image_thresh):
@@ -91,6 +152,50 @@ class DartLocalization:
         return image_thresh
         """
 
+    def rotateImage(img, angle):
+        """Rotates the image after a set angle
+        :param img: input image
+        :type img: image
+        :param angle: angle to rotate
+        :type angle: angle (in radiants)
+        :return: rotated image
+        :rtype: image
+        """        
+        (h, w) = img.shape[:2]
+        (cX, cY) = (w // 2, h // 2)
+
+        if angle == None:
+            print("ERROR - Dartlocalization.rotateImage - Angle nonetype")
+            return img
+
+        M = cv2.getRotationMatrix2D((cX, cY), math.degrees(angle), 1.0)
+
+        
+        rotated = cv2.warpAffine(img, M, (w, h))
+        extractedDartImg = DartLocalization.linearErode(rotated)
+        return extractedDartImg
+
+    def linearErode(img):
+        """Eroding method using linear structural element
+        :param img: input image
+        :type img: image
+        :return: output image
+        :rtype: image
+        """        
+        xb,yb,wb,hb = cv2.boundingRect(img)
+
+        if wb == None or wb < 15:
+            print("ERROR - Dartlocalization.LinearErode - wb is None")
+            return -1, -1
+
+        rotated_horizontal = int(wb // 10)
+
+        horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (rotated_horizontal, 1))
+        
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        img_new = cv2.dilate(img, kernel, iterations=1)
+        return cv2.erode(img_new, horizontalStructure, iterations=1)
+
     def getContour(img, diff_img, boarder_limit, clean):
         """Gets a list of the contours (blobs of pixels) and stores them from lagest to smallest.
         The dart should be the largest and therefore be the shape that we subtract to only get the dart in the threshold
@@ -107,7 +212,6 @@ class DartLocalization:
         :rtype: int, int
         """        
         threshold = img
-        #imshow("thresh before", threshold)
         contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         if len(contours) == 0:
             print("ERROR - DartLoalization.getContour - No Contour returing (-1,-1)")
@@ -135,12 +239,31 @@ class DartLocalization:
 
         dart_mask = cv2.subtract(threshold, cv2.bitwise_not(contour_mask))
 
-        center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=dart_mask)
-        max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=dart_mask, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
+        angle = None
+        pca_img = dart_mask.copy()
+        for i, cont in enumerate(contours):
+            # Calculate the area of each contour
+            area = cv2.contourArea(cont)
+            # Ignore contours that are too small or too large
+            if area < 1e2 or 1e5 < area:
+                continue
+            # Find the orientation of each shape
+            angle = DartLocalization.getOrientation(cont, pca_img)
+        if angle is None:
+            print("ERROR - angle is None in DartLocalization.getContour()")
+            return -1,-1
+        extractedDartImg = DartLocalization.rotateImage(img=threshold, angle=angle)
+        if extractedDartImg is None or extractedDartImg == (-1, -1):
+            print("ERROR - extractedDartImg is None in DartLocalization.getContour()")
+            return -1,-1
+        enhanced = DartLocalization.rotateImage(img=extractedDartImg, angle=(-angle))
 
-        #DartLocalization.printDebug(dart_mask, max_x, max_y, op_x, op_y, boarder_limit, clean)
+        center_of_mass_x, center_of_mass_y = DartLocalization.calculateCenterOfPixelMass(dart_mask=enhanced)
+        max_x, max_y, op_x, op_y = DartLocalization.getPointPosition(dart_mask=enhanced, center_of_mass_x=center_of_mass_x, center_of_mass_y=center_of_mass_y)
 
-        return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, op_x=op_x, op_y=op_y, boarder_limit=boarder_limit)
+        #DartLocalization.printDebug(enhanced, max_x, max_y, op_x, op_y, boarder_limit, clean)
+
+        return DartLocalization.dartPointCorrection(dart_mask=dart_mask, max_x=max_x, max_y=max_y, boarder_limit=boarder_limit)
     
     def calculateCenterOfPixelMass(dart_mask):
         """Calculates the center of mass on the binary image
@@ -185,7 +308,7 @@ class DartLocalization:
 
         return max_x, max_y, op_x, op_y
 
-    def dartPointCorrection(dart_mask, max_x, max_y, op_x, op_y, boarder_limit):
+    def dartPointCorrection(dart_mask, max_x, max_y, boarder_limit):
         """Corrects the dart tips position in case the tip is predicted to be on the boarder of the frame
 
         :param dart_mask: a mask of the dart
@@ -205,8 +328,8 @@ class DartLocalization:
         """        
 
         if max_y > dart_mask.shape[0] - boarder_limit or max_y < boarder_limit or max_x > dart_mask.shape[1] - boarder_limit or max_x < boarder_limit:
-            max_y = op_y
-            max_x = op_x
+            max_y = -1
+            max_x = -1
         
         return max_x, max_y
 
@@ -226,18 +349,23 @@ class DartLocalization:
         :param board_limiter: number of pixels from the boarder
         :type board_limiter: int
         """        
+        if dart_mask is None:
+            return
+        if image is None:
+            return
         print("dartMask size:", dart_mask.shape[0], dart_mask.shape[1])
         print("image size:", image.shape[0], image.shape[1])
         print("estimated point:",max_x, max_y)
         print("opposite point:",op_x, op_y)
         print("boarder limit", board_limiter)
 
-        image = cv2.circle(image, (int(max_x), int(max_y)), radius=10, color=(0,255,0), thickness=2)
-        image = cv2.circle(image, (int(op_x), int(op_y)), radius=10, color=(0,255,0), thickness=2)
+        image = cv2.circle(image, (int(max_x), int(max_y)), radius=2, color=(0,255,0), thickness=2)
+        image = cv2.circle(image, (int(op_x), int(op_y)), radius=2, color=(0,0,255), thickness=2)
+
         
-        cv2.imshow("mask", dart_mask)
-        cv2.imshow("img", image)
-        cv2.waitKey(0)
+        # cv2.imshow("mask", dart_mask)
+        # cv2.imshow("img", image)
+        # cv2.waitKey(0)
 
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
@@ -254,8 +382,8 @@ class DartLocalization:
         image_with_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_with_dart))
         image_without_dart = ImageNormalizer.normalize_image(ImageNormalizer.clahe_EQ(image_without_dart))
 
-        # image_with_dart = cv2.resize(image_with_dart, (640, 480), interpolation=cv2.INTER_AREA)
-        # image_without_dart = cv2.resize(image_without_dart, (640, 480), interpolation=cv2.INTER_AREA)
+        #image_with_dart = cv2.resize(image_with_dart, (1280, 720), interpolation=cv2.INTER_AREA)
+        #image_without_dart = cv2.resize(image_without_dart, (1280, 720), interpolation=cv2.INTER_AREA)
 
 
         diff_img, threshold = DartLocalization.thresholding(image_without_dart, image_with_dart)
@@ -263,5 +391,6 @@ class DartLocalization:
         #cv2.imshow("diff_img", diff_img)
         threshold = DartLocalization.erode_dilate(threshold)
         #cv2.imshow("threshold meme 2", threshold)
+        # cv2.waitKey(0)
 
         return DartLocalization.getContour(threshold, diff_img, 5, image_with_dart)

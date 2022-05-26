@@ -82,9 +82,16 @@ app.post('/coord', (req, res) => {
 })
 
 app.delete('/coord', (_req, res) => {
-	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
+	var new_image = 'public/combined' + new Date().getTime() + '.jpg';
 
-	res.render('index', obj)
+	sharp('public/ref.jpg')
+	  .toBuffer(function(err, buffer) {
+		fs.writeFile(new_image, buffer, function(e) {});
+			fs.unlinkSync(current_image);
+			current_image = new_image;
+			obj.image = current_image;
+			res.render('index', obj)
+	  });
 })
 
 server.listen(port, () => {

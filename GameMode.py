@@ -1,4 +1,5 @@
 from LightController import LightController
+from urllib.request import Request
 from Requester import Requester
 from enum import Enum
 import threading
@@ -61,6 +62,7 @@ class GameMode301(GameMode):
 
 		self.light.white()
 		Requester.post_scores(self.scores, self.current_player)
+		Requester.delete_coords()
 
 	def feedback(self):
 		self.light.green()
@@ -79,7 +81,8 @@ class GameMode301(GameMode):
 		self.light.white()
 		time.sleep(0.5)
 		
-	def give_points(self, score):
+
+	def give_points(self, score, coords):
 
 		if (self.game_status != GameStatus.ONGOING):
 			return
@@ -102,6 +105,7 @@ class GameMode301(GameMode):
 			self.game_status = GameStatus.GET_DARTS
 
 		Requester.post_scores(self.scores, self.current_player)
+		Requester.post_coords(coords[0], coords[1])
 
 	def change_player(self):
 		self.current_player = (self.current_player + 1) % self.player_count

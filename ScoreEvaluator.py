@@ -40,23 +40,23 @@ class ScoreEvaluator:
         proj_coordinate_list    =  self.project_coordinates(coordinate_list)
         if(len(proj_coordinate_list) == 0):
             print("ERROR: No good projeciton where possible, returning score 0")
-            return 0
+            return 0, (0,0)
         proj_coordinate_list    =  self.quality_control_projected_coordinates(proj_coordinate_list)
         average_coordinate      =  self.average_coordinates(proj_coordinate_list)
         if(average_coordinate is None):
             print("evaluate -- ERROR -- could not create average coordinate, returning 0")
-            return 0
-        """ 
-        image_ref = cv.imread('images\pic_nice.jpg')
+            return 0, (0,0)
+        
+        '''image_ref = cv.imread('images\pic_nice.jpg')
         test = image_ref
         for _,proj in enumerate(proj_coordinate_list):
             test = cv.circle(test, proj, 10, (250, 0, 0), 4)
         test = cv.circle(test, average_coordinate, 8, (0, 250, 0), 3)
-        cv.imshow("yes", test)
-        cv.waitKey(0) """
+        #cv.imshow("yes", test)
+        cv.waitKey(0) '''
         score = self.score_coordinate(average_coordinate)
         print("score: ", score)
-        return score
+        return score, average_coordinate
 
 
     def error_check_input(self, image_B_frames,image_I_frames):
