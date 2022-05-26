@@ -4,6 +4,8 @@ from GameMode import GameMode301, GameStatus
 from GUI import Game_GUI
 import cv2 as cv
 
+from CameraSetup import cameraSetup
+
 from Requester import Requester
 import MotionDetector
 import threading
@@ -107,6 +109,10 @@ class Dart:
             score = int(score)
             self.GUI.show_score(score)
             self.game_mode.give_points(score, coords) 
+
+            ind = self.detector.camera_indices
+            c = self.detector.caps
+            cameraSetup.stabilize(ind, c, 10)
 
             if self.game_mode.get_game_status() == GameStatus.GET_DARTS:
                 time.sleep(2)

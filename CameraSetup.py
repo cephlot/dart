@@ -59,7 +59,7 @@ class cameraSetup:
             raise RuntimeError("Unknown operating system")
 
     @staticmethod
-    def stabilize(camera_indices, caps):
+    def stabilize(camera_indices, caps, frame_count):
         """Waits until cameras are stable
 
         :param camera_indices: camera indices to wait for
@@ -68,5 +68,5 @@ class cameraSetup:
         :type caps: list
         """        
         for cameras in range(len(camera_indices)):
-            for i in range(50):
+            for i in range(frame_count):
                 ret, frame = caps[cameras].read()

@@ -27,7 +27,7 @@ class MotionDetector:
         for i in range(len(self.caps)):
             self.caps[i] = cv2.VideoCapture(self.camera_indices[i])
 
-        cameraSetup.stabilize(self.camera_indices, self.caps)
+        cameraSetup.stabilize(self.camera_indices, self.caps, 50)
 
         """
         # self.caps = [None] * len(self.camera_indices)
