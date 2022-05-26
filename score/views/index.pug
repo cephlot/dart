@@ -1,0 +1,175 @@
+doctype html
+html
+  head
+    title Scoreboard
+  style.
+    #score-board {
+      position: absolute;
+      text-align: left;
+      display: inline-block;
+      top: 0px;
+      column-count: 1;
+    }
+    .img {
+      display: inline-block;
+      text-align: center;
+      width: 50%;
+    }
+    .player {
+      display: inline-block;
+      padding: 15px;
+    }
+    .player h4 {
+      text-align: left;
+      font-weight: bold;
+    }
+    .score-box {
+      border: 3px solid black;
+      border-radius: 5px;
+      padding: 30px;
+      color: #2CB3C9;
+    }
+
+    .score-box-current {
+      border: 3px solid black;
+      border-radius: 5px;
+      padding: 30px;
+      background-color: #a3ff8a;
+      color: #2CB3C9;
+    }
+
+    .scorearea {
+      display: inline-block;
+      width: 50%;
+      top: 0px;
+    }
+
+    .current-player {
+      color: green;
+    }
+
+    .latest {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+  body
+
+    script.
+      var player_count = null
+
+    script(src="/socket.io/socket.io.js")
+
+    script.
+      function add_player() {
+        new_div = document.createElement("div");
+        new_div.classList.add("player");
+
+        player_title = document.createElement("h4");
+        player_title.innerHTML = "Player " + player_count;
+
+        score_box = document.createElement("div");
+        score_box.setAttribute("id", player_count);
+        score_box.classList.add("score-box")
+        score_box.innerHTML = 404
+
+        new_div.appendChild(player_title);
+        new_div.appendChild(score_box);
+
+        document.getElementById("score-board").appendChild(new_div);
+
+        player_count = player_count + 1;
+      }
+
+      function remove_player() {
+        board = document.getElementById("score-board");
+        board.lastChild.remove();
+        player_count = player_count - 1;
+      }
+
+      function update_scores(scores, latest) {
+        for (var i = 0; i < scores.length; i++) {
+          document.getElementById(i).innerHTML = scores[i];
+        }
+
+        if(latest) {
+          element = document.getElementById("latest_scores")
+
+          while (element.firstChild) {
+            element.removeChild(element.lastChild);
+          }
+
+          for(var i = 0; i < Math.min(latest.length, 10); i++) {
+            label = document.createElement("div")
+            label.innerHTML = latest.slice(-(i+1))[0]
+            element.appendChild(label)
+          }
+        }
+      }
+
+      function set_current_player(id) {
+        for (var i = 0; i < player_count; i++) {
+          score_box = document.getElementById(i);
+          if (score_box.classList.contains("score-box-current")) {
+            score_box.classList.remove("score-box-current");
+            score_box.classList.add("score-box");
+          }
+        }
+        
+        score_box = document.getElementById(id).classList.add("score-box-current");
+      }
+
+    script.
+      var socket = io();
+
+      socket.on('connect', function(player_count) {
+        console.log("connected");
+      });
+
+      socket.on('data', function(data) {
+        var scores = data['player_scores']   
+
+        if (player_count == null) {
+          player_count = document.getElementById("score-board").childElementCount;
+        }
+
+        console.log(data);
+
+        for ( ; player_count < scores.length; add_player());
+        for ( ; player_count > scores.length; remove_player());
+        update_scores(scores, data['latest']);
+
+        if (data['current_player'] != null) {
+          set_current_player(data['current_player']);
+        }
+
+        if(data['image'] != null) {
+          document.getElementById("board").src = data['image'];
+        }
+
+      });
+
+    div
+
+      .img
+        img.image(id='board', src='/'+image)
+
+      .scorearea
+        #score-board
+          - var current_player = current_player
+          - var player_count = player_scores.length
+          - for (var x = 0; x < player_count; x++)
+              if (x == current_player)
+                .player
+                  h4 Player #{x}
+                  div(id=x).score-box-current
+                    | #{player_scores[x]}
+              else 
+                .player
+                  h4 Player #{x}
+                  div(id=x).score-box
+                    | #{player_scores[x]}
+        .latest(id="latest_scores")
+            
+            
+                
