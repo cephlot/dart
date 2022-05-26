@@ -5,6 +5,8 @@ import threading
 import time
 import abc
 
+SERIAL_PORT = '/dev/ttyUSB0'
+
 class GameStatus(Enum):
 	ONGOING 	= 0
 	GET_DARTS 	= 1
@@ -46,7 +48,7 @@ class GameMode301(GameMode):
 		super().__init__()
 		self.throw_count 	= None
 		self.prev_score 	= None
-		self.light = LightController('/dev/ttyUSB0')
+		self.light = LightController(SERIAL_PORT)
 
 	def start_game(self, player_count):
 		super().start_game(player_count)
