@@ -85,6 +85,10 @@ class Game_GUI(object):
         self.score.config(text=f'Get your darts!\nscore: {score}')
         self.score.config(bg='white')
 
+    def show_game_over_screen(self, player_id):
+        assert isinstance(player_id, int)
+        self.score.config(text=f'Game over!\nPlayer: {player_id} won!')     
+
     def exit_game(self):
         self.window.quit()
 
