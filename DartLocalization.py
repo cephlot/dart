@@ -189,7 +189,6 @@ class DartLocalization:
             return -1, -1
 
         rotated_horizontal = int(wb // 10)
-    
 
         horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (rotated_horizontal, 1))
         
@@ -364,9 +363,9 @@ class DartLocalization:
         image = cv2.circle(image, (int(op_x), int(op_y)), radius=2, color=(0,0,255), thickness=2)
 
         
-        cv2.imshow("mask", dart_mask)
-        cv2.imshow("img", image)
-        cv2.waitKey(0)
+        # cv2.imshow("mask", dart_mask)
+        # cv2.imshow("img", image)
+        # cv2.waitKey(0)
 
     @staticmethod
     def find_dart_point(image_without_dart, image_with_dart):
@@ -392,6 +391,6 @@ class DartLocalization:
         #cv2.imshow("diff_img", diff_img)
         threshold = DartLocalization.erode_dilate(threshold)
         #cv2.imshow("threshold meme 2", threshold)
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
 
         return DartLocalization.getContour(threshold, diff_img, 5, image_with_dart)
