@@ -39,6 +39,8 @@ class Game_GUI(object):
 
 
     def show_start_screen(self, start_command):
+        self.score.pack_forget()
+
         self.title.config(anchor=CENTER)
         self.title.config(text='D.A.R.T', bg='black', foreground='white')
         self.title.pack(side=TOP, fill=BOTH, expand=1)
@@ -84,6 +86,10 @@ class Game_GUI(object):
     def show_get_darts_screen(self, score):
         self.score.config(text=f'Get your darts!\nscore: {score}')
         self.score.config(bg='white')
+
+    def show_game_over_screen(self, player_id):
+        assert isinstance(player_id, int)
+        self.score.config(text=f'Game over!\nPlayer: {player_id} won!')     
 
     def exit_game(self):
         self.window.quit()

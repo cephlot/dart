@@ -96,6 +96,8 @@ class GameMode301(GameMode):
 		if (self.scores[self.current_player] == 0):
 			self.game_status = GameStatus.GAME_WON
 			self.winner = self.current_player
+			Requester.post_scores(self.scores, score, self.current_player)
+			Requester.post_coords(coords[0], coords[1])
 			return
 		elif (self.scores[self.current_player] < 0):
 			self.scores[self.current_player] = self.prev_score
