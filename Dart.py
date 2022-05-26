@@ -104,6 +104,7 @@ class Dart:
             score, coords = self.get_score()
 
             if score == 0 and coords == (0,0):
+                print("Dart.py - No score from evaluate - ignoring throw")
                 continue
 
             score = int(score)
