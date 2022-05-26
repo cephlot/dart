@@ -8,7 +8,7 @@ class Requester:
     """
 
     @staticmethod
-    def post_scores(scores, current_player):
+    def post_scores_without_latest(scores, current_player):
         """Post scores to the specified address
 
         :param scores: list of player scores
