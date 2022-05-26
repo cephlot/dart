@@ -103,12 +103,12 @@ class GameMode301(GameMode):
 		self.throw_count += 1
 		if (self.throw_count >= 3):
 			self.change_player()
-			self.game_status = GameStatus.GET_DARTS
 
 		Requester.post_scores(self.scores, self.current_player)
 		Requester.post_coords(coords[0], coords[1])
 
 	def change_player(self):
+		self.game_status = GameStatus.GET_DARTS
 		self.current_player = (self.current_player + 1) % self.player_count
 		self.prev_score = self.scores[self.current_player]
 		self.throw_count = 0
