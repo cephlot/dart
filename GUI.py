@@ -39,6 +39,8 @@ class Game_GUI(object):
 
 
     def show_start_screen(self, start_command):
+        self.score.pack_forget()
+
         self.title.config(anchor=CENTER)
         self.title.config(text='D.A.R.T', bg='black', foreground='white')
         self.title.pack(side=TOP, fill=BOTH, expand=1)

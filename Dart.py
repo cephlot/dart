@@ -127,6 +127,8 @@ class Dart:
 
         print("Game over!")
         self.GUI.show_game_over_screen(self.game_mode.winner)
+        time.sleep(5)
+        self.GUI.show_start_screen(self.choose_player_amount)
 
 
     def resize_images(frames_before, frames_after):
