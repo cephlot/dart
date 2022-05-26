@@ -88,7 +88,7 @@ class MotionDetector:
                 previous_frame[i] = processed_frame
                 previous_frames[i].append(frame)
                 previous_frames[i] = previous_frames[i][-5:]
-                thresh_frame = cv2.threshold(src=diff_frame, thresh=50, maxval=255, type=cv2.THRESH_BINARY)[1]
+                thresh_frame = cv2.threshold(src=diff_frame, thresh=90, maxval=255, type=cv2.THRESH_BINARY)[1]
 
                 if cv2.countNonZero(thresh_frame) > 10:
                     # Threshold frame contains white pixels
