@@ -12,6 +12,7 @@ const fs = require('fs');
 var clients = [];
 var current_image = 'public/combined' + new Date().getTime() + '.jpg'
 let obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: current_image}
+var latest = [];
 
 io.listen(server);
 
@@ -45,9 +46,14 @@ app.put('/', (req, res) => {
 })
 
 app.post('/', (req, res) => {
-    obj = req.body
+	obj = req.body
+    
+	if(req.body.latest_score) {
+		latest.push(req.body.latest_score)
+		obj.latest = latest
+	}
 
-	console.log(req.body)
+	console.log(obj)
 	res.render('index', obj)
 })
 

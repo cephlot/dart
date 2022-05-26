@@ -104,7 +104,7 @@ class GameMode301(GameMode):
 		if (self.throw_count >= 3):
 			self.change_player()
 
-		Requester.post_scores(self.scores, self.current_player)
+		Requester.post_scores(self.scores, score, self.current_player)
 		Requester.post_coords(coords[0], coords[1])
 
 	def change_player(self):

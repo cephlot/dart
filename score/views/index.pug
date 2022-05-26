@@ -7,8 +7,8 @@ html
       position: absolute;
       text-align: left;
       display: inline-block;
-      width: 50%;
       top: 0px;
+      column-count: 1;
     }
     .img {
       display: inline-block;
@@ -38,8 +38,19 @@ html
       color: #2CB3C9;
     }
 
+    .scorearea {
+      display: inline-block;
+      width: 50%;
+      top: 0px;
+    }
+
     .current-player {
       color: green;
+    }
+
+    .latest {
+      display: inline-block;
+      vertical-align: top;
     }
 
   body
@@ -76,9 +87,23 @@ html
         player_count = player_count - 1;
       }
 
-      function update_scores(scores) {
+      function update_scores(scores, latest) {
         for (var i = 0; i < scores.length; i++) {
           document.getElementById(i).innerHTML = scores[i];
+        }
+
+        if(latest) {
+          element = document.getElementById("latest_scores")
+
+          while (element.firstChild) {
+            element.removeChild(element.lastChild);
+          }
+
+          for(var i = 0; i < Math.min(latest.length, 10); i++) {
+            label = document.createElement("div")
+            label.innerHTML = latest.slice(-(i+1))[0]
+            element.appendChild(label)
+          }
         }
       }
 
@@ -112,7 +137,7 @@ html
 
         for ( ; player_count < scores.length; add_player());
         for ( ; player_count > scores.length; remove_player());
-        update_scores(scores);
+        update_scores(scores, data['latest']);
 
         if (data['current_player'] != null) {
           set_current_player(data['current_player']);
@@ -128,18 +153,23 @@ html
 
       .img
         img.image(id='board', src='/'+image)
-      
-      #score-board
-        - var current_player = current_player
-        - var player_count = player_scores.length
-        - for (var x = 0; x < player_count; x++)
-            if (x == current_player)
-              .player
-                h4 Player #{x}
-                div(id=x).score-box-current
-                  | #{player_scores[x]}
-            else 
-              .player
-                h4 Player #{x}
-                div(id=x).score-box
-                  | #{player_scores[x]}
+
+      .scorearea
+        #score-board
+          - var current_player = current_player
+          - var player_count = player_scores.length
+          - for (var x = 0; x < player_count; x++)
+              if (x == current_player)
+                .player
+                  h4 Player #{x}
+                  div(id=x).score-box-current
+                    | #{player_scores[x]}
+              else 
+                .player
+                  h4 Player #{x}
+                  div(id=x).score-box
+                    | #{player_scores[x]}
+        .latest(id="latest_scores")
+            
+            
+                
