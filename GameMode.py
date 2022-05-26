@@ -6,8 +6,6 @@ import threading
 import time
 import abc
 
-SERIAL_PORT = '/dev/ttyUSB0'
-
 class GameStatus(Enum):
 	ONGOING 	= 0
 	GET_DARTS 	= 1
@@ -45,11 +43,13 @@ class GameMode(object):
 
 class GameMode301(GameMode):
 	"""Pogger"""
-	def __init__(self):
+	def __init__(self, serial_port):
 		super().__init__()
 		self.throw_count 	= None
 		self.prev_score 	= None
-		self.light = LightController(SERIAL_PORT)
+		if serial_port == None:
+			print('No serial port provided. Light strip will not be used.')
+		self.light = LightController(serial_port) if serial_port != None else None
 
 	def start_game(self, player_count):
 		super().start_game(player_count)
@@ -60,26 +60,29 @@ class GameMode301(GameMode):
 		self.throw_count 	= 0
 		self.prev_score 	= 0
 
-		self.light.white()
+		if self.light != None:
+			self.light.white()
 		Requester.post_scores(self.scores, self.current_player)
 		Requester.delete_coords()
 
 	def feedback(self):
-		self.light.green()
-		time.sleep(0.25)
-		self.light.white()
-		time.sleep(0.25)
-		self.light.green()
-		time.sleep(0.25)
-		self.light.white()
-		time.sleep(0.25)
-		time.sleep(0.5)
+		if self.light != None:
+			self.light.green()
+			time.sleep(0.25)
+			self.light.white()
+			time.sleep(0.25)
+			self.light.green()
+			time.sleep(0.25)
+			self.light.white()
+			time.sleep(0.25)
+			time.sleep(0.5)
 
 	def feedback_high(self):
-		self.light.rainbow()
-		time.sleep(1)
-		self.light.white()
-		time.sleep(0.5)
+		if self.light != None:
+			self.light.rainbow()
+			time.sleep(1)
+			self.light.white()
+			time.sleep(0.5)
 		
 
 	def give_points(self, score, coords):

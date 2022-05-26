@@ -1,3 +1,4 @@
+import sys
 from ImageAnalyzer import ImageAnalyzer
 from ScoreEvaluator import ScoreEvaluator
 from GameMode import GameMode301, GameStatus
@@ -16,11 +17,11 @@ class Dart:
     Class that represents a game of Dart
     """
 
-    def __init__(self):
+    def __init__(self, serial_port):
         self.detector       = MotionDetector.MotionDetector()
         self.evaluator      = None
 
-        self.game_mode      = GameMode301()
+        self.game_mode      = GameMode301(serial_port)
         self.GUI            = Game_GUI()
         self.frames_before  = None
         self.frames_before_before  = None
@@ -136,7 +137,8 @@ class Dart:
         return frames_before, frames_after
 
 if __name__ == '__main__':
-    dart = Dart()
+    serial_port = sys.argv[1] if len(sys.argv) >= 2 else None
+    dart = Dart(serial_port)
     dart.start()
 
 
