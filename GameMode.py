@@ -95,6 +95,7 @@ class GameMode301(GameMode):
 			self.winner = self.current_player
 			return
 		elif (self.scores[self.current_player] < 0):
+			self.scores[self.current_player] = self.prev_score
 			self.change_player()
 
 		self.feedback()
