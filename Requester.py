@@ -8,14 +8,30 @@ class Requester:
     """
 
     @staticmethod
-    def post_scores(scores, current_player):
+    def post_scores_without_latest(scores, current_player):
         """Post scores to the specified address
 
         :param scores: list of player scores
         :type scores: int list
+        :param current_player: current player index
+        :type current_player: int
         """
         assert isinstance(current_player, int)
         requests.post(IP, json={"player_scores": scores, "current_player": current_player})
+
+    @staticmethod
+    def post_scores(scores, score, current_player):
+        """Post scores to the specified address
+
+        :param scores: list of player scores
+        :type scores: int list
+        :param current_player: current player index
+        :type current_player: int
+        :param score: latest score
+        :type score: int
+        """
+        assert isinstance(current_player, int)
+        requests.post(IP, json={"player_scores": scores, "current_player": current_player, "latest_score": score})
     
     @staticmethod
     def post_coords(x, y):

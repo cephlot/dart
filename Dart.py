@@ -116,7 +116,6 @@ class Dart:
             cameraSetup.stabilize(ind, c, 10)
 
             if self.game_mode.get_game_status() == GameStatus.GET_DARTS:
-                time.sleep(2)
                 self.GUI.show_get_darts_screen(score)
                 self.wait_detect()
                 self.game_mode.set_game_status(GameStatus.ONGOING)
