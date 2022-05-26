@@ -53,7 +53,7 @@ class GameMode301(GameMode):
 
 	def start_game(self, player_count):
 		super().start_game(player_count)
-		self.scores = [20] * self.player_count
+		self.scores = [301] * self.player_count
 
 		self.game_status 	= GameStatus.ONGOING
 		self.current_player = 0
