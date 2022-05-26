@@ -61,10 +61,21 @@ class GameMode301(GameMode):
 		Requester.post_scores(self.scores, self.current_player)
 
 	def feedback(self):
+		self.light.green()
+		time.sleep(0.25)
+		self.light.white()
+		time.sleep(0.25)
+		self.light.green()
+		time.sleep(0.25)
+		self.light.white()
+		time.sleep(0.25)
+		time.sleep(0.5)
+
+	def feedback_high(self):
 		self.light.rainbow()
 		time.sleep(1)
 		self.light.white()
-		time.sleep(1)
+		time.sleep(0.5)
 		
 	def give_points(self, score):
 
