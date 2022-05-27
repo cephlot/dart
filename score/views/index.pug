@@ -27,15 +27,15 @@ html
       border: 3px solid black;
       border-radius: 5px;
       padding: 30px;
-      color: #2CB3C9;
+      color: #1d7482;
     }
 
     .score-box-current {
       border: 3px solid black;
       border-radius: 5px;
       padding: 30px;
-      background-color: #a3ff8a;
-      color: #2CB3C9;
+      background-color: #d5ffc9;
+      color: #000000;
     }
 
     .scorearea {
@@ -51,6 +51,10 @@ html
     .latest {
       display: inline-block;
       vertical-align: top;
+    }
+
+    .latest_score {
+      font-size: 25px;
     }
 
   body
@@ -101,6 +105,7 @@ html
 
           for(var i = 0; i < Math.min(latest.length, 10); i++) {
             label = document.createElement("div")
+            label.className = "latest_score";
             label.innerHTML = latest.slice(-(i+1))[0]
             element.appendChild(label)
           }
