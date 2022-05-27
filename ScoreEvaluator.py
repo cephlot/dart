@@ -136,7 +136,7 @@ class ScoreEvaluator:
 
 
     def check_if_no_dart(self, coordinate_list):
-        """Removes darrts from coordinate list that were not found
+        """Removes darts from coordinate list that were not found
         :param coordinate_list: list of coordinates
         :type coordinate_list: list
         :return: coordinate list

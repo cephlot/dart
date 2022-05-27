@@ -58,7 +58,7 @@ app.post('/', (req, res) => {
 })
 
 app.delete('/', (_req, res) => {
-	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.jpg'};
+	obj = {player_scores: [301, 301, 301, 301], current_player: 0, image: '/public/ref.png'};
 
 	res.render('index', obj)
 })
@@ -90,7 +90,7 @@ app.post('/coord', (req, res) => {
 app.delete('/coord', (_req, res) => {
 	var new_image = 'public/combined' + new Date().getTime() + '.jpg';
 
-	sharp('public/ref.jpg')
+	sharp('public/ref.png')
 	  .toBuffer(function(err, buffer) {
 		fs.writeFile(new_image, buffer, function(e) {});
 			fs.unlinkSync(current_image);
@@ -101,7 +101,7 @@ app.delete('/coord', (_req, res) => {
 })
 
 server.listen(port, () => {
-  sharp('public/ref.jpg')
+  sharp('public/ref.png')
 	  .toBuffer(function(err, buffer) {
 		fs.writeFile(current_image, buffer, function(e) {});
 	  });
