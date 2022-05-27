@@ -14,7 +14,6 @@ class MotionDetector:
         #bannedCam = 2
         self.camera_indices = cameraSetup.getCams(bannedCam)
         #self.open_cameras()
-        print("Waiting for motion...")
     
     def __del__(self):
         for i in range(len(self.caps)):
@@ -65,6 +64,8 @@ class MotionDetector:
         :return: tuple of lists containing images before and after
         :rtype: tuple
         """
+        
+        print("Waiting for motion...")
         previous_frame = [None] * len(self.caps)
         waiting_for_motion_end = False
 
