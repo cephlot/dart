@@ -184,17 +184,17 @@ class DartLocalization:
         """        
         xb,yb,wb,hb = cv2.boundingRect(img)
 
-        if wb == None or wb < 15:
+        if hb == None or hb < 15:
             print("ERROR - Dartlocalization.LinearErode - wb is None")
             return -1, -1
 
-        rotated_horizontal = int(wb // 10)
+        line_length = int(hb // 10)
 
-        horizontalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (rotated_horizontal, 1))
+        line_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_length))
         
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         img_new = cv2.dilate(img, kernel, iterations=1)
-        return cv2.erode(img_new, horizontalStructure, iterations=1)
+        return cv2.erode(img_new, line_kernel, iterations=1)
 
     def getContour(img, diff_img, boarder_limit, clean):
         """Gets a list of the contours (blobs of pixels) and stores them from lagest to smallest.
